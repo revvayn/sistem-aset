@@ -34,6 +34,8 @@
 
 <body>
 
+    <?php $role = session()->get('role'); ?>
+
     <div class="d-flex">
         <!-- Sidebar Navigasi Samping -->
         <div class="sidebar d-flex flex-column p-3 text-white">
@@ -42,33 +44,50 @@
                 <span class="fs-5 fw-bold">Sistem Asset</span>
             </a>
             <hr>
+            
             <ul class="nav nav-pills flex-column mb-auto">
+                <!-- SEMUA ROLE (Admin, Staff, Viewer) BISA AKSES -->
                 <li class="nav-item">
                     <a href="<?= base_url('asset') ?>" class="nav-link <?= (uri_string() == 'asset' || uri_string() == '') ? 'active' : '' ?>">
                         <i class="bi bi-table me-2"></i> Daftar Aset
                     </a>
                 </li>
-                <li>
-                    <a href="<?= base_url('master/categories') ?>" class="nav-link <?= strpos(uri_string(), 'master/categories') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-tags me-2"></i> Master Kategori
-                    </a>
-                </li>
-                <li>
-                    <a href="<?= base_url('master/components') ?>" class="nav-link <?= strpos(uri_string(), 'master/components') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-cpu me-2"></i> Master Komponen
-                    </a>
-                </li>
-                <li>
-                    <a href="<?= base_url('users') ?>" class="nav-link <?= strpos(uri_string(), 'users') !== false ? 'active' : '' ?>">
-                        <i class="bi bi-people me-2"></i> Management User
-                    </a>
-                </li>
+
+                <!-- KHUSUS ROLE ADMIN -->
+                <?php if ($role === 'admin') : ?>
+                    <li class="nav-header text-uppercase text-muted px-3 mt-3 mb-1 style-small" style="font-size: 0.75rem;">Master Data</li>
+                    <li>
+                        <a href="<?= base_url('master/categories') ?>" class="nav-link <?= strpos(uri_string(), 'master/categories') !== false ? 'active' : '' ?>">
+                            <i class="bi bi-tags me-2"></i> Master Kategori
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?= base_url('master/components') ?>" class="nav-link <?= strpos(uri_string(), 'master/components') !== false ? 'active' : '' ?>">
+                            <i class="bi bi-cpu me-2"></i> Master Komponen
+                        </a>
+                    </li>
+
+                    <li class="nav-header text-uppercase text-muted px-3 mt-3 mb-1 style-small" style="font-size: 0.75rem;">Pengaturan</li>
+                    <li>
+                        <a href="<?= base_url('users') ?>" class="nav-link <?= strpos(uri_string(), 'users') !== false ? 'active' : '' ?>">
+                            <i class="bi bi-people me-2"></i> Management User
+                        </a>
+                    </li>
+                <?php endif; ?>
             </ul>
+
             <hr>
+            
+            <!-- User Info & Dropdown Logout -->
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-person-circle fs-4 me-2"></i>
-                    <strong><?= session()->get('nama') ?? session()->get('username') ?? 'User' ?></strong>
+                    <div class="d-flex flex-column">
+                        <strong><?= session()->get('nama') ?? session()->get('username') ?? 'User' ?></strong>
+                        <small class="text-capitalize text-muted" style="font-size: 0.75rem;">
+                            <span class="badge bg-secondary"><?= esc($role ?? 'Guest') ?></span>
+                        </small>
+                    </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
                     <li>
@@ -89,7 +108,6 @@
         </div>
     </div>
 
-    <!-- Perbaikan: Gunakan src bukan href -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <?= $this->renderSection('scripts') ?>
 </body>
