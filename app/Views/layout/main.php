@@ -41,7 +41,7 @@
         <div class="sidebar d-flex flex-column p-3 text-white">
             <a href="<?= base_url('asset') ?>" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
                 <i class="bi bi-box-seam fs-4 me-2"></i>
-                <span class="fs-5 fw-bold">Sistem Asset</span>
+                <span class="fs-5 fw-bold">Sistem Manajemen Aset</span>
             </a>
             <hr>
             
