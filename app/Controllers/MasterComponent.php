@@ -41,11 +41,18 @@ class MasterComponent extends BaseController
     public function store()
     {
         $namaKomponen = $this->request->getPost('nama_komponen');
+        $tipeInput    = $this->request->getPost('tipe_input');
         
-        // Auto-generate key database dari nama komponen (contoh: "IP Address" -> "ip_address")
+        // List tipe input yang diizinkan (ditambahkan 'file')
+        $allowedTypes = ['text', 'number', 'password', 'date', 'file'];
+        if (!in_array($tipeInput, $allowedTypes)) {
+            return redirect()->back()->withInput()->with('error', 'Tipe input tidak valid!');
+        }
+
+        // Auto-generate key database dari nama komponen (contoh: "Foto Aset" -> "foto_aset")
         $keyKomponen = url_title(strtolower($namaKomponen), '_', true);
 
-        // Validasi kustom agar key_komponen tidak terduplikasi
+        // Validasi agar key_komponen tidak terduplikasi
         if ($this->componentModel->where('key_komponen', $keyKomponen)->first()) {
             return redirect()->back()->withInput()->with('error', 'Komponen dengan nama atau key serupa sudah ada!');
         }
@@ -53,7 +60,7 @@ class MasterComponent extends BaseController
         $this->componentModel->insert([
             'nama_komponen' => $namaKomponen,
             'key_komponen'  => $keyKomponen,
-            'tipe_input'    => $this->request->getPost('tipe_input'),
+            'tipe_input'    => $tipeInput,
         ]);
 
         return redirect()->to('/master/components')->with('message', 'Komponen baru berhasil ditambahkan!');
@@ -80,6 +87,14 @@ class MasterComponent extends BaseController
     public function update($id)
     {
         $namaKomponen = $this->request->getPost('nama_komponen');
+        $tipeInput    = $this->request->getPost('tipe_input');
+
+        // Validasi pilihan tipe input
+        $allowedTypes = ['text', 'number', 'password', 'date', 'file'];
+        if (!in_array($tipeInput, $allowedTypes)) {
+            return redirect()->back()->withInput()->with('error', 'Tipe input tidak valid!');
+        }
+
         $keyKomponen  = url_title(strtolower($namaKomponen), '_', true);
 
         // Cek jika key terduplikasi dengan komponen lain
@@ -91,7 +106,7 @@ class MasterComponent extends BaseController
         $this->componentModel->update($id, [
             'nama_komponen' => $namaKomponen,
             'key_komponen'  => $keyKomponen,
-            'tipe_input'    => $this->request->getPost('tipe_input'),
+            'tipe_input'    => $tipeInput,
         ]);
 
         return redirect()->to('/master/components')->with('message', 'Master komponen berhasil diperbarui!');

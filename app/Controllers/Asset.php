@@ -27,7 +27,6 @@ class Asset extends BaseController
     // 1. Halaman daftar aset
     public function index()
     {
-        // Gunakan $this->assetModel yang sudah diinisialisasi
         $data['assets'] = $this->assetModel
             ->select('assets.*, master_data.nama_kategori')
             ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
@@ -50,21 +49,36 @@ class Asset extends BaseController
         return $this->response->setJSON($components);
     }
 
-    // 4. Simpan Data Aset Baru
+    // 4. Simpan Data Aset Baru (UPDATE HANDLE UPLOAD FILE)
     public function store()
     {
         $masterDataId = $this->request->getPost('master_data_id');
         $components   = $this->componentModel->getComponentsByMasterData($masterDataId);
 
-        // PERBAIKAN: Ambil seluruh array 'specs' dari Form POST
         $specsInput   = $this->request->getPost('specs') ?? [];
+        $specsFiles   = $this->request->getFiles()['specs'] ?? []; // Ambil file ter-upload dalam array specs
 
         $specifications = [];
         foreach ($components as $comp) {
-            $key = $comp['key_komponen'];
-            // Ambil dari array specsInput
-            if (isset($specsInput[$key]) && $specsInput[$key] !== '') {
-                $specifications[$key] = $specsInput[$key];
+            $key  = $comp['key_komponen'];
+            $type = $comp['tipe_input'] ?? 'text';
+
+            // Jika tipe komponen adalah file/foto
+            if ($type === 'file' || $type === 'foto') {
+                if (isset($specsFiles[$key]) && $specsFiles[$key]->isValid() && !$specsFiles[$key]->hasMoved()) {
+                    $file     = $specsFiles[$key];
+                    $fileName = $file->getRandomName(); // Generate nama unik
+                    
+                    // Simpan file ke folder public/uploads/specs
+                    $file->move(FCPATH . 'uploads/specs', $fileName);
+                    
+                    $specifications[$key] = $fileName;
+                }
+            } else {
+                // Untuk tipe input biasa (text, number, date, dsb)
+                if (isset($specsInput[$key]) && $specsInput[$key] !== '') {
+                    $specifications[$key] = $specsInput[$key];
+                }
             }
         }
 
@@ -97,20 +111,46 @@ class Asset extends BaseController
         return view('asset/edit', $data);
     }
 
-    // 6. Update Data Aset
+    // 6. Update Data Aset (UPDATE HANDLE UPDATE/KEEP/DELETE FILE)
     public function update($id)
     {
+        $asset    = $this->assetModel->find($id);
+        $oldSpecs = json_decode($asset['specifications'] ?? '{}', true) ?? [];
+
         $masterDataId = $this->request->getPost('master_data_id');
         $components   = $this->componentModel->getComponentsByMasterData($masterDataId);
 
-        // PERBAIKAN: Ambil seluruh array 'specs' dari Form POST
-        $specsInput   = $this->request->getPost('specs') ?? [];
+        $specsInput = $this->request->getPost('specs') ?? [];
+        $specsFiles = $this->request->getFiles()['specs'] ?? [];
 
         $specifications = [];
         foreach ($components as $comp) {
-            $key = $comp['key_komponen'];
-            if (isset($specsInput[$key]) && $specsInput[$key] !== '') {
-                $specifications[$key] = $specsInput[$key];
+            $key  = $comp['key_komponen'];
+            $type = $comp['tipe_input'] ?? 'text';
+
+            if ($type === 'file' || $type === 'foto') {
+                // Jika user mengunggah foto BARU
+                if (isset($specsFiles[$key]) && $specsFiles[$key]->isValid() && !$specsFiles[$key]->hasMoved()) {
+                    $file     = $specsFiles[$key];
+                    $fileName = $file->getRandomName();
+                    $file->move(FCPATH . 'uploads/specs', $fileName);
+
+                    // Hapus foto lama jika ada di server
+                    if (!empty($oldSpecs[$key]) && file_exists(FCPATH . 'uploads/specs/' . $oldSpecs[$key])) {
+                        unlink(FCPATH . 'uploads/specs/' . $oldSpecs[$key]);
+                    }
+
+                    $specifications[$key] = $fileName;
+                } else {
+                    // Jika tidak mengunggah foto baru, pakai nama foto LAMA
+                    if (isset($oldSpecs[$key])) {
+                        $specifications[$key] = $oldSpecs[$key];
+                    }
+                }
+            } else {
+                if (isset($specsInput[$key]) && $specsInput[$key] !== '') {
+                    $specifications[$key] = $specsInput[$key];
+                }
             }
         }
 
@@ -125,10 +165,23 @@ class Asset extends BaseController
         return redirect()->to('/asset')->with('message', 'Aset berhasil diperbarui!');
     }
 
-    // 7. Hapus Aset
+    // 7. Hapus Aset (UPDATE HAPUS FILE GAMBAR JIKA ASET DIHAPUS)
     public function delete($id)
     {
-        $this->assetModel->delete($id);
+        $asset = $this->assetModel->find($id);
+        if ($asset) {
+            $specs = json_decode($asset['specifications'] ?? '{}', true) ?? [];
+            
+            // Hapus semua file gambar aset ini dari direktori server
+            foreach ($specs as $val) {
+                if (is_string($val) && file_exists(FCPATH . 'uploads/specs/' . $val)) {
+                    @unlink(FCPATH . 'uploads/specs/' . $val);
+                }
+            }
+
+            $this->assetModel->delete($id);
+        }
+
         return redirect()->to('/asset')->with('message', 'Aset berhasil dihapus!');
     }
 }

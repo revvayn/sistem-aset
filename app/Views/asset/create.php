@@ -9,7 +9,8 @@
                 <a href="<?= base_url('asset') ?>" class="btn btn-sm btn-light">Kembali</a>
             </div>
             <div class="card-body">
-                <form action="<?= base_url('asset/store') ?>" method="POST">
+                <!-- Tambahkan enctype="multipart/form-data" untuk upload file -->
+                <form action="<?= base_url('asset/store') ?>" method="POST" enctype="multipart/form-data">
                     <?= csrf_field() ?>
 
                     <!-- Informasi Umum -->
@@ -103,6 +104,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                 inputHtml = `<input type="number" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
                             } else if (comp.tipe_input === 'date') {
                                 inputHtml = `<input type="date" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                            } else if (comp.tipe_input === 'file' || comp.tipe_input === 'foto') {
+                                // Input khusus untuk Upload File / Gambar
+                                inputHtml = `
+                                    <input type="file" class="form-control" name="specs[${comp.key_komponen}]" accept="image/png, image/jpeg, image/jpg" ${requiredAttr}>
+                                    <small class="text-muted d-block mt-1">Format yang diizinkan: JPG, JPEG, PNG</small>
+                                `;
                             } else {
                                 inputHtml = `<input type="text" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
                             }

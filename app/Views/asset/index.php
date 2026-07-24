@@ -196,12 +196,31 @@
                             const val = specs[key] ? specs[key] : '-';
                             const formattedKey = key.replace(/_/g, ' ').toUpperCase();
 
+                            // 1. Cek apakah value merupakan nama file gambar
+                            let displayValue = val;
+                            if (typeof val === 'string' && val !== '-') {
+                                const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(val);
+
+                                if (isImage) {
+                                    // Render sebagai tag IMG jika file berupa gambar
+                                    const imgUrl = `<?= base_url('uploads/specs/') ?>/${val}`;
+                                    displayValue = `
+                                        <div class="my-1">
+                                            <a href="${imgUrl}" target="_blank">
+                                                <img src="${imgUrl}" alt="${formattedKey}" class="img-thumbnail shadow-sm" style="max-height: 150px; max-width: 200px; object-fit: cover;">
+                                            </a>
+                                            <small class="d-block text-muted mt-1"><i class="bi bi-box-arrow-up-right"></i> Klik untuk memperbesar</small>
+                                        </div>
+                                    `;
+                                }
+                            }
+
                             const row = `
-                            <tr>
-                                <td class="fw-semibold text-secondary" width="40%">${formattedKey}</td>
-                                <td>${val}</td>
-                            </tr>
-                        `;
+                                <tr>
+                                    <td class="fw-semibold text-secondary" width="40%">${formattedKey}</td>
+                                    <td>${displayValue}</td>
+                                </tr>
+                            `;
                             specsContainer.innerHTML += row;
                         });
                     }

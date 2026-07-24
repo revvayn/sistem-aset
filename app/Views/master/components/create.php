@@ -13,11 +13,11 @@
                     <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
                 <?php endif; ?>
 
-                <form action="<?= base_url('master/components/store') ?>" method="POST">
+                <form action="<?= base_url('master/components/store') ?>" method="POST"> 
                     <?= csrf_field() ?>
                     <div class="mb-3">
                         <label class="form-label">Nama Komponen / Atribut <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_komponen" class="form-control" placeholder="Contoh: IMEI 1, Tanggal Garansi, Port Swicth" required>
+                        <input type="text" name="nama_komponen" class="form-control" placeholder="Contoh: IMEI 1, Tanggal Garansi, Foto Aset" required>
                     </div>
 
                     <div class="mb-3">
@@ -27,6 +27,7 @@
                             <option value="number">Number (Angka / Kapasitas / Port)</option>
                             <option value="password">Password (Sandi / Secret Key)</option>
                             <option value="date">Date (Tanggal Pembelian / Garansi)</option>
+                            <option value="file">File / Foto (Upload Gambar / Dokumen)</option>
                         </select>
                     </div>
 

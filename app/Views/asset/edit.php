@@ -18,7 +18,8 @@
                 <a href="<?= base_url('asset') ?>" class="btn btn-sm btn-dark">Kembali</a>
             </div>
             <div class="card-body">
-                <form action="<?= base_url('asset/update/' . $asset['id']) ?>" method="POST">
+                <!-- Wajib tambahkan enctype="multipart/form-data" untuk penanganan file upload -->
+                <form action="<?= base_url('asset/update/' . $asset['id']) ?>" method="POST" enctype="multipart/form-data">
                     <?= csrf_field() ?>
 
                     <div class="row">
@@ -62,19 +63,41 @@
                             <div class="row">
                                 <?php foreach ($components as $comp) : ?>
                                     <?php 
-                                        $key      = $comp['key_komponen'];
-                                        $val      = $specs[$key] ?? '';
-                                        $reqAttr  = ($comp['is_required'] ?? 0) == 1 ? 'required' : '';
-                                        $reqBadge = ($comp['is_required'] ?? 0) == 1 ? ' <span class="text-danger">*</span>' : '';
+                                        $key       = $comp['key_komponen'];
+                                        $val       = $specs[$key] ?? '';
+                                        $reqAttr   = ($comp['is_required'] ?? 0) == 1 ? 'required' : '';
+                                        $reqBadge  = ($comp['is_required'] ?? 0) == 1 ? ' <span class="text-danger">*</span>' : '';
                                         $inputType = !empty($comp['tipe_input']) ? $comp['tipe_input'] : 'text';
                                     ?>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label font-weight-bold"><?= esc($comp['nama_komponen']) ?><?= $reqBadge ?></label>
-                                        <input type="<?= esc($inputType) ?>" 
-                                               name="specs[<?= esc($key) ?>]" 
-                                               value="<?= esc($val) ?>" 
-                                               class="form-control" 
-                                               <?= $reqAttr ?>>
+                                        
+                                        <?php if ($inputType === 'file' || $inputType === 'foto') : ?>
+                                            <!-- Penanganan Khusus untuk Input Tipe FILE / FOTO -->
+                                            <?php if (!empty($val) && file_exists(FCPATH . 'uploads/specs/' . $val)) : ?>
+                                                <div class="mb-2">
+                                                    <a href="<?= base_url('uploads/specs/' . $val) ?>" target="_blank">
+                                                        <img src="<?= base_url('uploads/specs/' . $val) ?>" alt="Foto Aset" class="img-thumbnail" style="max-height: 100px;">
+                                                    </a>
+                                                    <small class="text-muted d-block mt-1">File saat ini: <?= esc($val) ?></small>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <input type="file" 
+                                                   name="specs[<?= esc($key) ?>]" 
+                                                   class="form-control" 
+                                                   accept="image/png, image/jpeg, image/jpg"
+                                                   <?= empty($val) ? $reqAttr : '' ?>>
+                                            <small class="text-muted">Biarkan kosong jika tidak ingin mengubah foto/file.</small>
+
+                                        <?php else : ?>
+                                            <!-- Input Tipe Biasa (Text, Number, Date, Password, dll) -->
+                                            <input type="<?= esc($inputType) ?>" 
+                                                   name="specs[<?= esc($key) ?>]" 
+                                                   value="<?= esc($val) ?>" 
+                                                   class="form-control" 
+                                                   <?= $reqAttr ?>>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>

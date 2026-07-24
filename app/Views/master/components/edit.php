@@ -32,6 +32,7 @@
                             <option value="number" <?= $component['tipe_input'] === 'number' ? 'selected' : '' ?>>Number (Angka / Kapasitas / Port)</option>
                             <option value="password" <?= $component['tipe_input'] === 'password' ? 'selected' : '' ?>>Password (Sandi / Secret Key)</option>
                             <option value="date" <?= $component['tipe_input'] === 'date' ? 'selected' : '' ?>>Date (Tanggal Pembelian / Garansi)</option>
+                            <option value="file" <?= $component['tipe_input'] === 'file' ? 'selected' : '' ?>>File / Foto (Upload Gambar / Dokumen)</option>
                         </select>
                     </div>
 
