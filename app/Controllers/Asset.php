@@ -24,13 +24,42 @@ class Asset extends BaseController
         $this->componentModel  = new ComponentModel();
     }
 
-    // 1. Halaman daftar aset
+    // 1. Halaman daftar aset (Filter, Pencarian, JOIN & Pagination)
     public function index()
     {
-        $data['assets'] = $this->assetModel
+        $keyword  = $this->request->getGet('keyword');
+        $category = $this->request->getGet('category');
+
+        // Query dasar dengan JOIN ke tabel master_data untuk mengambil nama_kategori
+        $builder = $this->assetModel
             ->select('assets.*, master_data.nama_kategori')
-            ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
-            ->findAll();
+            ->join('master_data', 'master_data.id = assets.master_data_id', 'left');
+
+        // Filter Keyword (No Asset atau Nama Asset)
+        if (!empty($keyword)) {
+            $builder->groupStart()
+                    ->like('assets.no_asset', $keyword)
+                    ->orLike('assets.nama_aset', $keyword)
+                    ->groupEnd();
+        }
+
+        // Filter Kategori berdasarkan nama_kategori
+        if (!empty($category)) {
+            $builder->where('master_data.nama_kategori', $category);
+        }
+
+        $perPage = 10;
+
+        $data = [
+            'title'       => 'Daftar Aset',
+            'assets'      => $builder->paginate($perPage, 'asset'),
+            'pager'       => $this->assetModel->pager,
+            'currentPage' => $this->request->getVar('page_asset') ? (int)$this->request->getVar('page_asset') : 1,
+            'perPage'     => $perPage,
+            'keyword'     => $keyword,
+            'category'    => $category,
+            'categories'  => $this->masterDataModel->findAll(), // Mengambil list kategori dari master_data
+        ];
 
         return view('asset/index', $data);
     }
@@ -49,33 +78,29 @@ class Asset extends BaseController
         return $this->response->setJSON($components);
     }
 
-    // 4. Simpan Data Aset Baru (UPDATE HANDLE UPLOAD FILE)
+    // 4. Simpan Data Aset Baru
     public function store()
     {
         $masterDataId = $this->request->getPost('master_data_id');
         $components   = $this->componentModel->getComponentsByMasterData($masterDataId);
 
         $specsInput   = $this->request->getPost('specs') ?? [];
-        $specsFiles   = $this->request->getFiles()['specs'] ?? []; // Ambil file ter-upload dalam array specs
+        $specsFiles   = $this->request->getFiles()['specs'] ?? [];
 
         $specifications = [];
         foreach ($components as $comp) {
             $key  = $comp['key_komponen'];
             $type = $comp['tipe_input'] ?? 'text';
 
-            // Jika tipe komponen adalah file/foto
             if ($type === 'file' || $type === 'foto') {
                 if (isset($specsFiles[$key]) && $specsFiles[$key]->isValid() && !$specsFiles[$key]->hasMoved()) {
                     $file     = $specsFiles[$key];
-                    $fileName = $file->getRandomName(); // Generate nama unik
-                    
-                    // Simpan file ke folder public/uploads/specs
+                    $fileName = $file->getRandomName();
+
                     $file->move(FCPATH . 'uploads/specs', $fileName);
-                    
                     $specifications[$key] = $fileName;
                 }
             } else {
-                // Untuk tipe input biasa (text, number, date, dsb)
                 if (isset($specsInput[$key]) && $specsInput[$key] !== '') {
                     $specifications[$key] = $specsInput[$key];
                 }
@@ -111,10 +136,14 @@ class Asset extends BaseController
         return view('asset/edit', $data);
     }
 
-    // 6. Update Data Aset (UPDATE HANDLE UPDATE/KEEP/DELETE FILE)
+    // 6. Update Data Aset
     public function update($id)
     {
-        $asset    = $this->assetModel->find($id);
+        $asset = $this->assetModel->find($id);
+        if (!$asset) {
+            return redirect()->to('/asset')->with('error', 'Aset tidak ditemukan!');
+        }
+
         $oldSpecs = json_decode($asset['specifications'] ?? '{}', true) ?? [];
 
         $masterDataId = $this->request->getPost('master_data_id');
@@ -129,20 +158,17 @@ class Asset extends BaseController
             $type = $comp['tipe_input'] ?? 'text';
 
             if ($type === 'file' || $type === 'foto') {
-                // Jika user mengunggah foto BARU
                 if (isset($specsFiles[$key]) && $specsFiles[$key]->isValid() && !$specsFiles[$key]->hasMoved()) {
                     $file     = $specsFiles[$key];
                     $fileName = $file->getRandomName();
                     $file->move(FCPATH . 'uploads/specs', $fileName);
 
-                    // Hapus foto lama jika ada di server
                     if (!empty($oldSpecs[$key]) && file_exists(FCPATH . 'uploads/specs/' . $oldSpecs[$key])) {
-                        unlink(FCPATH . 'uploads/specs/' . $oldSpecs[$key]);
+                        @unlink(FCPATH . 'uploads/specs/' . $oldSpecs[$key]);
                     }
 
                     $specifications[$key] = $fileName;
                 } else {
-                    // Jika tidak mengunggah foto baru, pakai nama foto LAMA
                     if (isset($oldSpecs[$key])) {
                         $specifications[$key] = $oldSpecs[$key];
                     }
@@ -165,14 +191,13 @@ class Asset extends BaseController
         return redirect()->to('/asset')->with('message', 'Aset berhasil diperbarui!');
     }
 
-    // 7. Hapus Aset (UPDATE HAPUS FILE GAMBAR JIKA ASET DIHAPUS)
+    // 7. Hapus Aset
     public function delete($id)
     {
         $asset = $this->assetModel->find($id);
         if ($asset) {
             $specs = json_decode($asset['specifications'] ?? '{}', true) ?? [];
-            
-            // Hapus semua file gambar aset ini dari direktori server
+
             foreach ($specs as $val) {
                 if (is_string($val) && file_exists(FCPATH . 'uploads/specs/' . $val)) {
                     @unlink(FCPATH . 'uploads/specs/' . $val);
@@ -180,8 +205,9 @@ class Asset extends BaseController
             }
 
             $this->assetModel->delete($id);
+            return redirect()->to('/asset')->with('message', 'Aset berhasil dihapus!');
         }
 
-        return redirect()->to('/asset')->with('message', 'Aset berhasil dihapus!');
+        return redirect()->to('/asset')->with('error', 'Aset tidak ditemukan!');
     }
 }

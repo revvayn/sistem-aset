@@ -2,17 +2,34 @@
 
 /**
  * @var array $assets
+ * @var object $pager
+ * @var int $currentPage
+ * @var int $perPage
+ * @var string|null $keyword
+ * @var string|null $category
+ * @var array $categories
  */
+
+// Ambil role dari session
+$role = session()->get('role');
 ?>
 
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('content') ?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Daftar Aset</h2>
-    <a href="<?= base_url('asset/create') ?>" class="btn btn-primary">+ Tambah Aset Baru</a>
+    
+    <!-- Tombol Tambah Aset: HANYA untuk Admin & Staf -->
+    <?php if (in_array($role, ['admin', 'staf'])) : ?>
+        <a href="<?= base_url('asset/create') ?>" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> + Tambah Aset Baru
+        </a>
+    <?php endif; ?>
 </div>
 
+<!-- Flash Message Notifications -->
 <?php if (session()->getFlashdata('message')) : ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <?= session()->getFlashdata('message') ?>
@@ -27,13 +44,55 @@
     </div>
 <?php endif; ?>
 
-<div class="card shadow-sm">
+<!-- ==================== FORM FILTER & SEARCH ==================== -->
+<div class="card mb-4 shadow-sm">
     <div class="card-body">
+        <form action="<?= base_url('asset') ?>" method="GET" class="row g-3">
+            <!-- Input Cari Keyword -->
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" name="keyword" class="form-control" placeholder="Cari No Asset / Nama Asset..." value="<?= esc($keyword ?? '') ?>">
+                </div>
+            </div>
+
+            <!-- Dropdown Filter Kategori -->
+            <div class="col-md-4">
+                <select name="category" class="form-select">
+                    <option value="">-- Semua Kategori --</option>
+                    <?php if (!empty($categories)) : ?>
+                        <?php foreach ($categories as $cat) : ?>
+                            <option value="<?= $cat['nama_kategori'] ?>" <?= (($category ?? '') == $cat['nama_kategori']) ? 'selected' : '' ?>>
+                                <?= esc($cat['nama_kategori']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+
+            <!-- Tombol Filter & Reset -->
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-secondary w-100">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                <?php if (!empty($keyword) || !empty($category)) : ?>
+                    <a href="<?= base_url('asset') ?>" class="btn btn-outline-danger" title="Reset Filter">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==================== TABEL DAFTAR ASET ==================== -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th width="50">No</th>
+                        <th width="50" class="text-center">No</th>
                         <th>No. Aset</th>
                         <th>Nama Aset</th>
                         <th>Kategori</th>
@@ -43,10 +102,13 @@
                 </thead>
                 <tbody>
                     <?php if (!empty($assets)) : ?>
-                        <?php $i = 1;
-                        foreach ($assets as $ast) : ?>
+                        <?php 
+                            // Perhitungan nomor urut dinamis berdasarkan halaman pagination
+                            $i = 1 + (($perPage ?? 10) * (($currentPage ?? 1) - 1));
+                        ?>
+                        <?php foreach ($assets as $ast) : ?>
                             <tr>
-                                <td><?= $i++ ?></td>
+                                <td class="text-center"><?= $i++ ?></td>
                                 <td><code><?= esc($ast['no_asset'] ?? '-') ?></code></td>
                                 <td><strong><?= esc($ast['nama_aset'] ?? '-') ?></strong></td>
                                 <td><span class="badge bg-secondary"><?= esc($ast['nama_kategori'] ?? '-') ?></span></td>
@@ -63,14 +125,15 @@
                                     <span class="badge <?= $badgeClass ?>"><?= esc($status) ?></span>
                                 </td>
                                 <td class="text-center">
-                                    <!-- Tombol Detail -->
+                                    <!-- Parsing Specifications -->
                                     <?php
-                                    // Pastikan specifications diparsing ke array lebih dulu
                                     $specsData = $ast['specifications'] ?? [];
                                     if (is_string($specsData)) {
                                         $specsData = json_decode($specsData, true) ?? [];
                                     }
                                     ?>
+
+                                    <!-- Tombol Detail: BISA DILIHAT SEMUA ROLE (Admin, Staf, Viewer) -->
                                     <button type="button"
                                         class="btn btn-sm btn-outline-info me-1 btn-detail"
                                         data-bs-toggle="modal"
@@ -83,27 +146,43 @@
                                         <i class="bi bi-eye"></i> Detail
                                     </button>
 
-                                    <!-- Tombol Edit -->
-                                    <a href="<?= base_url('asset/edit/' . $ast['id']) ?>" class="btn btn-sm btn-outline-warning me-1">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                    <!-- Tombol Edit & Hapus: HANYA KHUSUS ADMIN -->
+                                    <?php if ($role === 'admin') : ?>
+                                        <a href="<?= base_url('asset/edit/' . $ast['id']) ?>" class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
 
-                                    <!-- Tombol Hapus -->
-                                    <a href="<?= base_url('asset/delete/' . $ast['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus aset ini?')">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                        <a href="<?= base_url('asset/delete/' . $ast['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus aset ini?')" title="Hapus">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else : ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted">Belum ada data aset.</td>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Belum ada data aset yang ditemukan.
+                            </td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- ==================== PAGINATION FOOTER ==================== -->
+    <?php if (!empty($assets) && isset($pager)) : ?>
+        <div class="card-footer d-flex justify-content-between align-items-center bg-white py-3">
+            <div class="small text-muted">
+                Menampilkan halaman <strong><?= $currentPage ?? 1 ?></strong>
+            </div>
+            <div>
+                <?= $pager->links('asset', 'default_full') ?>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Modal Detail Aset -->
@@ -182,7 +261,6 @@
                 try {
                     let specs = typeof rawSpecs === 'string' ? JSON.parse(rawSpecs) : rawSpecs;
 
-                    // Jika terparsing dua kali (stringified JSON)
                     if (typeof specs === 'string') {
                         specs = JSON.parse(specs);
                     }
@@ -196,13 +274,11 @@
                             const val = specs[key] ? specs[key] : '-';
                             const formattedKey = key.replace(/_/g, ' ').toUpperCase();
 
-                            // 1. Cek apakah value merupakan nama file gambar
                             let displayValue = val;
                             if (typeof val === 'string' && val !== '-') {
                                 const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(val);
 
                                 if (isImage) {
-                                    // Render sebagai tag IMG jika file berupa gambar
                                     const imgUrl = `<?= base_url('uploads/specs/') ?>/${val}`;
                                     displayValue = `
                                         <div class="my-1">
