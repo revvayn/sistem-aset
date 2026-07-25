@@ -20,9 +20,9 @@ $role = session()->get('role');
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Daftar Aset</h2>
-    
+
     <!-- Tombol Tambah Aset: HANYA untuk Admin & Staf -->
-    <?php if (in_array($role, ['admin', 'staf'])) : ?>
+    <?php if (in_array($role, ['admin', 'staff'])) : ?>
         <a href="<?= base_url('asset/create') ?>" class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i> + Tambah Aset Baru
         </a>
@@ -102,9 +102,9 @@ $role = session()->get('role');
                 </thead>
                 <tbody>
                     <?php if (!empty($assets)) : ?>
-                        <?php 
-                            // Perhitungan nomor urut dinamis berdasarkan halaman pagination
-                            $i = 1 + (($perPage ?? 10) * (($currentPage ?? 1) - 1));
+                        <?php
+                        // Perhitungan nomor urut dinamis berdasarkan halaman pagination
+                        $i = 1 + (($perPage ?? 10) * (($currentPage ?? 1) - 1));
                         ?>
                         <?php foreach ($assets as $ast) : ?>
                             <tr>
@@ -146,16 +146,20 @@ $role = session()->get('role');
                                         <i class="bi bi-eye"></i> Detail
                                     </button>
 
-                                    <!-- Tombol Edit & Hapus: HANYA KHUSUS ADMIN -->
-                                    <?php if ($role === 'admin') : ?>
+                                    <!-- Tombol Edit: Admin & Staf/Staff -->
+                                    <?php if (in_array(strtolower($role ?? ''), ['admin', 'staff'])) : ?>
                                         <a href="<?= base_url('asset/edit/' . $ast['id']) ?>" class="btn btn-sm btn-outline-warning me-1" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                    <?php endif; ?>
 
+                                    <!-- Tombol Hapus: Khusus Admin -->
+                                    <?php if (strtolower($role ?? '') === 'admin') : ?>
                                         <a href="<?= base_url('asset/delete/' . $ast['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus aset ini?')" title="Hapus">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     <?php endif; ?>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -275,28 +279,46 @@ $role = session()->get('role');
                             const formattedKey = key.replace(/_/g, ' ').toUpperCase();
 
                             let displayValue = val;
+
                             if (typeof val === 'string' && val !== '-') {
+                                // 1. Cek apakah file berupa Gambar
                                 const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(val);
+                                // 2. Cek apakah file berupa Dokumen (PDF / Word)
+                                const isPdf = /\.pdf$/i.test(val);
+                                const isDoc = /\.(doc|docx)$/i.test(val);
+
+                                const fileUrl = `<?= base_url('uploads/specs/') ?>/${val}`;
 
                                 if (isImage) {
-                                    const imgUrl = `<?= base_url('uploads/specs/') ?>/${val}`;
                                     displayValue = `
-                                        <div class="my-1">
-                                            <a href="${imgUrl}" target="_blank">
-                                                <img src="${imgUrl}" alt="${formattedKey}" class="img-thumbnail shadow-sm" style="max-height: 150px; max-width: 200px; object-fit: cover;">
-                                            </a>
-                                            <small class="d-block text-muted mt-1"><i class="bi bi-box-arrow-up-right"></i> Klik untuk memperbesar</small>
-                                        </div>
-                                    `;
+                <div class="my-1">
+                    <a href="${fileUrl}" target="_blank">
+                        <img src="${fileUrl}" alt="${formattedKey}" class="img-thumbnail shadow-sm" style="max-height: 150px; max-width: 200px; object-fit: cover;">
+                    </a>
+                    <small class="d-block text-muted mt-1"><i class="bi bi-box-arrow-up-right"></i> Klik untuk memperbesar</small>
+                </div>
+            `;
+                                } else if (isPdf) {
+                                    displayValue = `
+                <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-outline-danger my-1">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Buka Dokumen PDF
+                </a>
+            `;
+                                } else if (isDoc) {
+                                    displayValue = `
+                <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary my-1">
+                    <i class="bi bi-file-earmark-word me-1"></i> Unduh Dokumen Word
+                </a>
+            `;
                                 }
                             }
 
                             const row = `
-                                <tr>
-                                    <td class="fw-semibold text-secondary" width="40%">${formattedKey}</td>
-                                    <td>${displayValue}</td>
-                                </tr>
-                            `;
+        <tr>
+            <td class="fw-semibold text-secondary" width="40%">${formattedKey}</td>
+            <td>${displayValue}</td>
+        </tr>
+    `;
                             specsContainer.innerHTML += row;
                         });
                     }

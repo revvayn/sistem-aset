@@ -30,6 +30,8 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->group('', ['filter' => 'role:admin,staff'], static function ($routes) {
         $routes->get('asset/create', 'Asset::create');
         $routes->post('asset/store', 'Asset::store');
+        $routes->get('asset/edit/(:num)', 'Asset::edit/$1');
+        $routes->post('asset/update/(:num)', 'Asset::update/$1');
     });
 
     // ==========================================
@@ -37,8 +39,6 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     // ==========================================
     $routes->group('', ['filter' => 'role:admin'], static function ($routes) {
         // Asset Edit & Delete
-        $routes->get('asset/edit/(:num)', 'Asset::edit/$1');
-        $routes->post('asset/update/(:num)', 'Asset::update/$1');
         $routes->get('asset/delete/(:num)', 'Asset::delete/$1');
 
         // Master Category Management

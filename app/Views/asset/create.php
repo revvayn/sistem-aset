@@ -70,67 +70,78 @@
 
 <?= $this->section('scripts') ?>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const categorySelect = document.getElementById('master_data_id');
-    const wrapper = document.getElementById('dynamic-components-wrapper');
-    const container = document.getElementById('dynamic-components-fields');
-    const spinner = document.getElementById('loading-spinner');
+    document.addEventListener('DOMContentLoaded', function() {
+        const categorySelect = document.getElementById('master_data_id');
+        const wrapper = document.getElementById('dynamic-components-wrapper');
+        const container = document.getElementById('dynamic-components-fields');
+        const spinner = document.getElementById('loading-spinner');
 
-    if(categorySelect) {
-        categorySelect.addEventListener('change', function () {
-            const masterDataId = this.value;
-            if (!masterDataId) return;
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                const masterDataId = this.value;
+                if (!masterDataId) return;
 
-            spinner.classList.remove('d-none');
-            wrapper.classList.add('d-none');
-            container.innerHTML = '';
+                spinner.classList.remove('d-none');
+                wrapper.classList.add('d-none');
+                container.innerHTML = '';
 
-            fetch(`<?= base_url('asset/get-components') ?>/${masterDataId}`)
-                .then(response => response.json())
-                .then(data => {
-                    spinner.classList.add('d-none');
+                fetch(`<?= base_url('asset/get-components') ?>/${masterDataId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        spinner.classList.add('d-none');
 
-                    if (data.length > 0) {
-                        wrapper.classList.remove('d-none');
+                        if (data.length > 0) {
+                            wrapper.classList.remove('d-none');
 
-                        data.forEach(comp => {
-                            const requiredAttr = comp.is_required == 1 ? 'required' : '';
-                            const requiredLabel = comp.is_required == 1 ? '<span class="text-danger">*</span>' : '';
-                            
-                            let inputHtml = '';
-                            if (comp.tipe_input === 'password') {
-                                inputHtml = `<input type="password" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
-                            } else if (comp.tipe_input === 'number') {
-                                inputHtml = `<input type="number" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
-                            } else if (comp.tipe_input === 'date') {
-                                inputHtml = `<input type="date" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
-                            } else if (comp.tipe_input === 'file' || comp.tipe_input === 'foto') {
-                                // Input khusus untuk Upload File / Gambar
-                                inputHtml = `
-                                    <input type="file" class="form-control" name="specs[${comp.key_komponen}]" accept="image/png, image/jpeg, image/jpg" ${requiredAttr}>
-                                    <small class="text-muted d-block mt-1">Format yang diizinkan: JPG, JPEG, PNG</small>
-                                `;
-                            } else {
-                                inputHtml = `<input type="text" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
-                            }
+                            data.forEach(comp => {
+                                const requiredAttr = comp.is_required == 1 ? 'required' : '';
+                                const requiredLabel = comp.is_required == 1 ? '<span class="text-danger">*</span>' : '';
 
-                            const fieldGroup = `
+                                let inputHtml = '';
+                                if (comp.tipe_input === 'password') {
+                                    inputHtml = `<input type="password" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                } else if (comp.tipe_input === 'number') {
+                                    inputHtml = `<input type="number" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                } else if (comp.tipe_input === 'date') {
+                                    inputHtml = `<input type="date" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                } else if (comp.tipe_input === 'file' || comp.tipe_input === 'foto') {
+                                    // Tentukan atribut accept dan petunjuk teks berdasarkan tipe_input
+                                    let acceptFormat = "image/png, image/jpeg, image/jpg, .pdf, .doc, .docx";
+                                    let helpText = "Format yang diizinkan: JPG, PNG, PDF, DOC, DOCX";
+
+                                    if (comp.tipe_input === 'foto') {
+                                        acceptFormat = "image/png, image/jpeg, image/jpg";
+                                        helpText = "Format yang diizinkan: JPG, JPEG, PNG";
+                                    } else if (comp.tipe_input === 'file') {
+                                        acceptFormat = ".pdf, .doc, .docx, image/png, image/jpeg, image/jpg";
+                                        helpText = "Format yang diizinkan: PDF, DOC, DOCX, JPG, PNG";
+                                    }
+
+                                    inputHtml = `
+        <input type="file" class="form-control" name="specs[${comp.key_komponen}]" accept="${acceptFormat}" ${requiredAttr}>
+        <small class="text-muted d-block mt-1">${helpText}</small>
+    `;
+                                } else {
+                                    inputHtml = `<input type="text" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                }
+
+                                const fieldGroup = `
                                 <div class="mb-3">
                                     <label class="form-label">${comp.nama_komponen} ${requiredLabel}</label>
                                     ${inputHtml}
                                 </div>
                             `;
 
-                            container.insertAdjacentHTML('beforeend', fieldGroup);
-                        });
-                    }
-                })
-                .catch(error => {
-                    spinner.classList.add('d-none');
-                    console.error('Error fetching components:', error);
-                });
-        });
-    }
-});
+                                container.insertAdjacentHTML('beforeend', fieldGroup);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        spinner.classList.add('d-none');
+                        console.error('Error fetching components:', error);
+                    });
+            });
+        }
+    });
 </script>
 <?= $this->endSection() ?>
