@@ -11,9 +11,9 @@
     "build": "npx @tailwindcss/cli -i ./src/input.css -o ./public/css/style.css --minify"
   },
   "repository": {
-  "type": "git",
-  "url": "git+https://github.com/revvayn/sistem-aset.git"
-},
+    "type": "git",
+    "url": "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"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
