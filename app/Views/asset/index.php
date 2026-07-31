@@ -51,22 +51,22 @@ $role = session()->get('role');
     </div>
 <?php endif; ?>
 
-<!-- ==================== FORM FILTER & SEARCH ==================== -->
+<!-- ==================== FORM FILTER & SEARCH (AUTO SUBMIT) ==================== -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
-    <form action="<?= base_url('asset') ?>" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+    <form id="filterForm" action="<?= base_url('asset') ?>" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-4">
         <!-- Input Cari Keyword -->
-        <div class="md:col-span-5">
+        <div class="md:col-span-6">
             <div class="relative flex items-center">
                 <span class="absolute left-3 text-gray-400">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" name="keyword" class="w-full pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Cari No Asset / Nama Asset..." value="<?= esc($keyword ?? '') ?>">
+                <input type="text" id="keywordInput" name="keyword" class="w-full pl-9 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Cari No Asset / Nama Asset..." value="<?= esc($keyword ?? '') ?>" autocomplete="off">
             </div>
         </div>
 
         <!-- Dropdown Filter Kategori -->
-        <div class="md:col-span-4">
-            <select name="category" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+        <div class="md:col-span-5">
+            <select id="categorySelect" name="category" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer">
                 <option value="">-- Semua Kategori --</option>
                 <?php if (!empty($categories)) : ?>
                     <?php foreach ($categories as $cat) : ?>
@@ -78,14 +78,12 @@ $role = session()->get('role');
             </select>
         </div>
 
-        <!-- Tombol Filter & Reset -->
-        <div class="md:col-span-3 flex gap-2">
-            <button type="submit" class="flex-1 inline-flex justify-center items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-150">
-                <i class="bi bi-funnel"></i> Filter
-            </button>
+        <!-- Tombol Reset Filter (Hanya tampil jika ada filter aktif) -->
+        <div class="md:col-span-1 flex items-center justify-end">
             <?php if (!empty($keyword) || !empty($category)) : ?>
-                <a href="<?= base_url('asset') ?>" class="px-3 py-2 border border-red-300 text-red-600 hover:bg-red-50 text-sm rounded-lg transition-colors duration-150 flex items-center justify-center" title="Reset Filter">
+                <a href="<?= base_url('asset') ?>" class="w-full py-2 border border-red-300 text-red-600 hover:bg-red-50 text-sm rounded-lg transition-colors duration-150 flex items-center justify-center gap-1.5" title="Reset Filter">
                     <i class="bi bi-x-circle text-lg"></i>
+                    <span class="md:hidden text-xs font-medium">Reset</span>
                 </a>
             <?php endif; ?>
         </div>
@@ -194,7 +192,7 @@ $role = session()->get('role');
     <?php endif; ?>
 </div>
 
-<!-- Modal Detail Aset (JS Managed Modal) -->
+<!-- Modal Detail Aset -->
 <div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden transform transition-all">
         <!-- Modal Header -->
@@ -261,6 +259,34 @@ $role = session()->get('role');
 <?= $this->section('scripts') ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // ================= AUTO SUBMIT FILTER & SEARCH =================
+        const filterForm = document.getElementById('filterForm');
+        const keywordInput = document.getElementById('keywordInput');
+        const categorySelect = document.getElementById('categorySelect');
+
+        // Automatic submit saat Kategori diubah
+        categorySelect.addEventListener('change', function() {
+            filterForm.submit();
+        });
+
+        // Automatic submit saat mengetik Keyword (menggunakan Debounce 500ms agar tidak me-refresh setiap 1 huruf)
+        let debounceTimer;
+        keywordInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                filterForm.submit();
+            }, 500); // Menunggu 0.5 detik setelah pengguna selesai mengetik
+        });
+
+        // Menempatkan kursor di akhir teks input keyword setelah halaman ter-refresh
+        if (keywordInput.value.length > 0) {
+            keywordInput.focus();
+            const val = keywordInput.value;
+            keywordInput.value = '';
+            keywordInput.value = val;
+        }
+
+        // ================= MODAL DETAIL LOGIC =================
         const detailModal = document.getElementById('detailModal');
         const detailButtons = document.querySelectorAll('.btn-detail');
         const closeButtons = document.querySelectorAll('.btn-close-modal');
