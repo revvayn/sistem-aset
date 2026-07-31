@@ -1,68 +1,90 @@
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('content') ?>
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Tambah Dokumentasi Aset Baru</h5>
-                <a href="<?= base_url('asset') ?>" class="btn btn-sm btn-light">Kembali</a>
-            </div>
-            <div class="card-body">
-                <!-- Tambahkan enctype="multipart/form-data" untuk upload file -->
-                <form action="<?= base_url('asset/store') ?>" method="POST" enctype="multipart/form-data">
-                    <?= csrf_field() ?>
+<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Card Utama -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        
+        <!-- Header Card -->
+        <div class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white">
+            <h3 class="text-lg font-bold flex items-center gap-2">
+                <i class="bi bi-plus-circle-fill"></i> Tambah Dokumentasi Aset Baru
+            </h3>
+            <a href="<?= base_url('asset') ?>" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white font-medium text-xs rounded-lg transition-colors duration-150 inline-flex items-center gap-1 shadow-sm border border-white/20">
+                <i class="bi bi-arrow-left"></i> Kembali
+            </a>
+        </div>
 
-                    <!-- Informasi Umum -->
-                    <div class="mb-3">
-                        <label for="no_asset" class="form-label">No. Aset / Kode Unik <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="no_asset" name="no_asset" placeholder="Contoh: AST-PC-2026-001" required>
+        <!-- Body Card -->
+        <div class="p-6">
+            <!-- Form Wajib enctype multipart/form-data -->
+            <form action="<?= base_url('asset/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-5">
+                <?= csrf_field() ?>
+
+                <!-- Informasi Umum -->
+                <div>
+                    <label for="no_asset" class="block text-sm font-medium text-gray-700 mb-1">
+                        No. Aset / Kode Unik <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="no_asset" name="no_asset" placeholder="Contoh: AST-PC-2026-001" required>
+                </div>
+
+                <div>
+                    <label for="nama_aset" class="block text-sm font-medium text-gray-700 mb-1">
+                        Nama Aset <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="nama_aset" name="nama_aset" placeholder="Contoh: PC Server Utama" required>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="master_data_id" class="block text-sm font-medium text-gray-700 mb-1">
+                            Pilih Kategori (Master Data) <span class="text-red-500">*</span>
+                        </label>
+                        <select class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="master_data_id" name="master_data_id" required>
+                            <option value="" selected disabled>-- Pilih Kategori Aset --</option>
+                            <?php foreach ($categories ?? [] as $cat) : ?>
+                                <option value="<?= $cat['id'] ?>"><?= esc($cat['nama_kategori']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="nama_aset" class="form-label">Nama Aset <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="nama_aset" name="nama_aset" placeholder="Contoh: PC Server Utama" required>
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
+                            Status Aset
+                        </label>
+                        <select class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="status" name="status">
+                            <option value="Aktif" selected>Aktif</option>
+                            <option value="Perbaikan">Perbaikan</option>
+                            <option value="Rusak">Rusak</option>
+                            <option value="Disimpan">Disimpan</option>
+                        </select>
                     </div>
+                </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="master_data_id" class="form-label">Pilih Kategori (Master Data) <span class="text-danger">*</span></label>
-                            <select class="form-select" id="master_data_id" name="master_data_id" required>
-                                <option value="" selected disabled>-- Pilih Kategori Aset --</option>
-                                <?php foreach ($categories ?? [] as $cat) : ?>
-                                    <option value="<?= $cat['id'] ?>"><?= esc($cat['nama_kategori']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">Status Aset</label>
-                            <select class="form-select" id="status" name="status">
-                                <option value="Aktif" selected>Aktif</option>
-                                <option value="Perbaikan">Perbaikan</option>
-                                <option value="Rusak">Rusak</option>
-                                <option value="Disimpan">Disimpan</option>
-                            </select>
-                        </div>
-                    </div>
+                <hr class="border-gray-200 my-6">
 
-                    <hr class="my-4">
+                <!-- Dynamic Components Area -->
+                <div id="dynamic-components-wrapper" class="hidden">
+                    <h4 class="text-base font-bold text-blue-600 flex items-center gap-2 mb-3">
+                        <i class="bi bi-sliders"></i> Spesifikasi Komponen Kategori
+                    </h4>
+                    <div id="dynamic-components-fields" class="p-5 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+                </div>
 
-                    <!-- Dynamic Components Area -->
-                    <div id="dynamic-components-wrapper" class="d-none">
-                        <h6 class="text-primary mb-3">Spesifikasi Komponen Kategori</h6>
-                        <div id="dynamic-components-fields"></div>
-                    </div>
+                <!-- Loading Spinner -->
+                <div id="loading-spinner" class="text-center hidden my-6 py-4">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent" role="status"></div>
+                    <p class="text-xs text-gray-500 mt-2 font-medium">Mengekstrak atribut komponen...</p>
+                </div>
 
-                    <div id="loading-spinner" class="text-center d-none my-3">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="small text-muted mt-2">Mengekstrak atribut komponen...</p>
-                    </div>
-
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-success btn-lg">Simpan Aset</button>
-                    </div>
-                </form>
-            </div>
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-sm hover:shadow transition-all duration-150 flex items-center justify-center gap-2">
+                        <i class="bi bi-check-circle-fill"></i> Simpan Aset
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -81,31 +103,31 @@
                 const masterDataId = this.value;
                 if (!masterDataId) return;
 
-                spinner.classList.remove('d-none');
-                wrapper.classList.add('d-none');
+                spinner.classList.remove('hidden');
+                wrapper.classList.add('hidden');
                 container.innerHTML = '';
 
                 fetch(`<?= base_url('asset/get-components') ?>/${masterDataId}`)
                     .then(response => response.json())
                     .then(data => {
-                        spinner.classList.add('d-none');
+                        spinner.classList.add('hidden');
 
                         if (data.length > 0) {
-                            wrapper.classList.remove('d-none');
+                            wrapper.classList.remove('hidden');
 
                             data.forEach(comp => {
                                 const requiredAttr = comp.is_required == 1 ? 'required' : '';
-                                const requiredLabel = comp.is_required == 1 ? '<span class="text-danger">*</span>' : '';
+                                const requiredLabel = comp.is_required == 1 ? '<span class="text-red-500">*</span>' : '';
+                                const baseInputClass = "w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all";
 
                                 let inputHtml = '';
                                 if (comp.tipe_input === 'password') {
-                                    inputHtml = `<input type="password" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                    inputHtml = `<input type="password" class="${baseInputClass}" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
                                 } else if (comp.tipe_input === 'number') {
-                                    inputHtml = `<input type="number" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                    inputHtml = `<input type="number" class="${baseInputClass}" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
                                 } else if (comp.tipe_input === 'date') {
-                                    inputHtml = `<input type="date" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                    inputHtml = `<input type="date" class="${baseInputClass}" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
                                 } else if (comp.tipe_input === 'file' || comp.tipe_input === 'foto') {
-                                    // Tentukan atribut accept dan petunjuk teks berdasarkan tipe_input
                                     let acceptFormat = "image/png, image/jpeg, image/jpg, .pdf, .doc, .docx";
                                     let helpText = "Format yang diizinkan: JPG, PNG, PDF, DOC, DOCX";
 
@@ -117,27 +139,29 @@
                                         helpText = "Format yang diizinkan: PDF, DOC, DOCX, JPG, PNG";
                                     }
 
+                                    const fileInputClass = "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg cursor-pointer bg-white outline-none focus:outline-none";
+
                                     inputHtml = `
-        <input type="file" class="form-control" name="specs[${comp.key_komponen}]" accept="${acceptFormat}" ${requiredAttr}>
-        <small class="text-muted d-block mt-1">${helpText}</small>
-    `;
+                                        <input type="file" class="${fileInputClass}" name="specs[${comp.key_komponen}]" accept="${acceptFormat}" ${requiredAttr}>
+                                        <p class="text-xs text-gray-500 mt-1">${helpText}</p>
+                                    `;
                                 } else {
-                                    inputHtml = `<input type="text" class="form-control" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                    inputHtml = `<input type="text" class="${baseInputClass}" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
                                 }
 
                                 const fieldGroup = `
-                                <div class="mb-3">
-                                    <label class="form-label">${comp.nama_komponen} ${requiredLabel}</label>
-                                    ${inputHtml}
-                                </div>
-                            `;
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1">${comp.nama_komponen} ${requiredLabel}</label>
+                                        ${inputHtml}
+                                    </div>
+                                `;
 
                                 container.insertAdjacentHTML('beforeend', fieldGroup);
                             });
                         }
                     })
                     .catch(error => {
-                        spinner.classList.add('d-none');
+                        spinner.classList.add('hidden');
                         console.error('Error fetching components:', error);
                     });
             });
