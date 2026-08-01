@@ -20,7 +20,7 @@ class RoleFilter implements FilterInterface
 
         // 3. Jika ada batasan role ($arguments), cek apakah role user diizinkan
         if (!empty($arguments) && !in_array($userRole, $arguments)) {
-            return redirect()->to('/asset')->with('error', 'Anda tidak memiliki hak akses untuk fitur ini!');
+            return redirect()->to('/dashboard')->with('error', 'Anda tidak memiliki hak akses untuk fitur ini!');
         }
     }
 

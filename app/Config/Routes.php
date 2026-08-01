@@ -5,7 +5,8 @@ use CodeIgniter\Router\RouteCollection;
 /** @var RouteCollection $routes */
 
 // Route Utama / Default (Membutuhkan Login)
-$routes->get('/', 'Asset::index', ['filter' => 'auth']);
+$routes->get('/', 'Dashboard::index', ['filter' => 'auth']);
+$routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
 
 // Auth Routes (Public)
 $routes->get('login', 'Auth::login');
@@ -20,6 +21,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     // 1. AKSES SEMUA USER (Admin, Staf, Viewer)
     // ==========================================
     $routes->group('', ['filter' => 'role:admin,staff,viewer'], static function ($routes) {
+        $routes->get('dashboard', 'Dashboard::index');
         $routes->get('asset', 'Asset::index');
         $routes->get('asset/get-components/(:num)', 'Asset::getComponents/$1');
     });

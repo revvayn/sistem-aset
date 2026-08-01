@@ -9,7 +9,7 @@ class Auth extends BaseController
     public function login()
     {
         if (session()->get('isLoggedIn')) {
-            return redirect()->to('/asset');
+            return redirect()->to('/dashboard');
         }
         return view('auth/login');
     }
@@ -32,7 +32,7 @@ class Auth extends BaseController
                 'isLoggedIn' => true,
             ];
             $session->set($sessionData);
-            return redirect()->to('/asset');
+            return redirect()->to('/dashboard');
         } else {
             $session->setFlashdata('msg', 'Email atau Password Salah');
             return redirect()->to('/login');
