@@ -173,6 +173,71 @@
         </div>
     </div>
 
+    <!-- Floating Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col items-end gap-3 max-w-sm w-[calc(100%-2rem)] pointer-events-none"></div>
+
+    <?php
+    $flashToasts = [];
+    if ($m = session()->getFlashdata('message')) {
+        $flashToasts[] = ['type' => 'success', 'text' => $m];
+    }
+    if ($e = session()->getFlashdata('error')) {
+        $flashToasts[] = ['type' => 'danger', 'text' => $e];
+    }
+    if ($m = session()->getFlashdata('msg')) {
+        $flashToasts[] = ['type' => 'danger', 'text' => $m];
+    }
+    $validationErrors = session()->getFlashdata('errors');
+    if (is_array($validationErrors)) {
+        foreach ($validationErrors as $err) {
+            $flashToasts[] = ['type' => 'danger', 'text' => $err];
+        }
+    }
+    ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.getElementById('toast-container');
+            const toasts    = <?= json_encode($flashToasts, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>;
+            if (!container || !toasts.length) return;
+
+            const configs = {
+                success: { icon: 'bi-check-circle-fill',        color: 'text-emerald-600', bar: 'bg-emerald-500' },
+                danger:  { icon: 'bi-exclamation-triangle-fill', color: 'text-rose-600',   bar: 'bg-rose-500'   },
+                warning: { icon: 'bi-exclamation-circle-fill', color: 'text-amber-600',   bar: 'bg-amber-400'  },
+                info:    { icon: 'bi-info-circle-fill',        color: 'text-blue-600',    bar: 'bg-blue-500'   }
+            };
+
+            function dismiss(toast) {
+                if (!toast) return;
+                toast.classList.add('toast-closing');
+                setTimeout(function () { toast.remove(); }, 300);
+            }
+
+            toasts.forEach(function (t) {
+                const cfg   = configs[t.type] || configs.info;
+                const toast = document.createElement('div');
+                toast.className = 'toast-item';
+                toast.innerHTML =
+                    '<div class="w-1 self-stretch shrink-0 ' + cfg.bar + '"></div>' +
+                    '<div class="p-3.5 flex items-start gap-3 flex-1">' +
+                        '<span class="text-lg ' + cfg.color + '"><i class="bi ' + cfg.icon + '"></i></span>' +
+                        '<p class="flex-1 text-xs font-medium text-gray-700 leading-relaxed">' + t.text + '</p>' +
+                        '<button type="button" class="toast-close flex-none -m-1 p-1 text-gray-400 hover:text-gray-700 transition-colors text-sm" aria-label="Tutup">&times;</button>' +
+                    '</div>';
+                container.appendChild(toast);
+
+                requestAnimationFrame(function () { toast.classList.add('toast-visible'); });
+
+                const timer = setTimeout(function () { dismiss(toast); }, t.type === 'danger' ? 7000 : 4000);
+                toast.querySelector('.toast-close').addEventListener('click', function () {
+                    clearTimeout(timer);
+                    dismiss(toast);
+                });
+            });
+        });
+    </script>
+
     <?= $this->renderSection('scripts') ?>
 
 </body>

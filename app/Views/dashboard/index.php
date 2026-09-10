@@ -17,7 +17,7 @@
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <div>
         <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Utama</h2>
-        <p class="text-sm text-gray-500">Ringkasan statistik data aset, kategori, komponen, dan kelola draf peminjaman.</p>
+        <p class="text-sm text-gray-500">Ringkasan statistik data aset, kategori, dan komponen.</p>
     </div>
     <a href="<?= base_url('asset/create') ?>" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-emerald-600/20 transition-all duration-150">
         <i class="bi bi-plus-lg"></i> Tambah Aset
@@ -92,7 +92,7 @@
 <!-- ==================== 2. GRID UTAMA ==================== -->
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     
-    <!-- LEFT COLUMN: Tabel Aset Terbaru & Draf Peminjaman (8 Kolom) -->
+    <!-- LEFT COLUMN: Tabel Aset Terbaru (8 Kolom) -->
     <div class="lg:col-span-8 space-y-6">
         
         <!-- Tabel Aset Terbaru -->
@@ -164,64 +164,7 @@
         </div>
 
         <!-- Section Keranjang / Draf Peminjaman Aset (Cart) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-                <h3 class="font-bold text-gray-900 text-sm flex items-center gap-2">
-                    <span class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 text-xs"><i class="bi bi-cart3"></i></span>
-                    Draf Keranjang Pengajuan / Peminjaman Aset
-                </h3>
-                <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-medium rounded-full text-xs border border-emerald-200">
-                    2 Item Terpilih
-                </span>
-            </div>
-
-            <!-- List Item Cart -->
-            <div class="space-y-3 mb-5">
-                <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-xl">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                            <i class="bi bi-laptop"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-800 text-xs">Laptop ThinkPad X1 Carbon</h4>
-                            <p class="text-[11px] text-gray-400 font-mono">AST-2026-001 • <span class="text-gray-600">Elektronik</span></p>
-                        </div>
-                    </div>
-                    <button type="button" class="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-colors" title="Hapus dari Draf">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-
-                <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-xl">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                            <i class="bi bi-display"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-800 text-xs">Monitor Dell UltraSharp 27"</h4>
-                            <p class="text-[11px] text-gray-400 font-mono">AST-2026-042 • <span class="text-gray-600">Perangkat Output</span></p>
-                        </div>
-                    </div>
-                    <button type="button" class="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-colors" title="Hapus dari Draf">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Form Eksekusi Cart -->
-            <form action="<?= base_url('asset/process-cart') ?>" method="POST" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                <?= csrf_field() ?>
-                <div class="sm:col-span-8">
-                    <input type="text" name="catatan" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs text-gray-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white outline-none placeholder-gray-400" placeholder="Keterangan pengajuan / nama peminjam..." required>
-                </div>
-                <div class="sm:col-span-4">
-                    <button type="submit" class="w-full py-2.5 px-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition-all duration-150 flex items-center justify-center gap-1.5">
-                        <i class="bi bi-send"></i> Ajukan Draf
-                    </button>
-                </div>
-            </form>
-        </div>
-
+        <!-- Fitur cart belum diimplementasikan; blok statis dihapus agar tidak menampilkan tombol/aksi yang mati. -->
     </div>
 
     <!-- RIGHT COLUMN: Distribusi Kategori & Komponen System Info (4 Kolom) -->

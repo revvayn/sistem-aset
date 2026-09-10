@@ -9,6 +9,16 @@
 </head>
 <body class="min-h-screen bg-gray-950 font-sans antialiased">
 
+    <!-- Floating Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col items-end gap-3 max-w-sm w-[calc(100%-2rem)] pointer-events-none"></div>
+
+    <?php
+    $flashToasts = [];
+    if ($m = session()->getFlashdata('msg')) {
+        $flashToasts[] = ['type' => 'danger', 'text' => $m];
+    }
+    ?>
+
     <div class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
         <!-- Dekorasi blur -->
@@ -32,14 +42,6 @@
                         <h4 class="text-2xl font-bold text-gray-900 tracking-tight">Login Sistem Aset</h4>
                         <p class="text-xs text-gray-500 mt-1.5">Masukkan kredensial Anda untuk masuk</p>
                     </div>
-
-                    <!-- Flash Message Alert -->
-                    <?php if(session()->getFlashdata('msg')):?>
-                        <div class="mb-6 p-3.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm flex items-center gap-2.5">
-                            <i class="bi bi-exclamation-circle-fill shrink-0"></i>
-                            <span><?= session()->getFlashdata('msg') ?></span>
-                        </div>
-                    <?php endif;?>
 
                     <!-- Form -->
                     <form action="<?= base_url('login/process') ?>" method="post" class="space-y-4">
@@ -90,6 +92,49 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.getElementById('toast-container');
+            const toasts    = <?= json_encode($flashToasts, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>;
+            if (!container || !toasts.length) return;
+
+            const configs = {
+                success: { icon: 'bi-check-circle-fill',        color: 'text-emerald-600', bar: 'bg-emerald-500' },
+                danger:  { icon: 'bi-exclamation-triangle-fill', color: 'text-rose-600',   bar: 'bg-rose-500'   },
+                warning: { icon: 'bi-exclamation-circle-fill', color: 'text-amber-600',   bar: 'bg-amber-400'  },
+                info:    { icon: 'bi-info-circle-fill',        color: 'text-blue-600',    bar: 'bg-blue-500'   }
+            };
+
+            function dismiss(toast) {
+                if (!toast) return;
+                toast.classList.add('toast-closing');
+                setTimeout(function () { toast.remove(); }, 300);
+            }
+
+            toasts.forEach(function (t) {
+                const cfg   = configs[t.type] || configs.info;
+                const toast = document.createElement('div');
+                toast.className = 'toast-item';
+                toast.innerHTML =
+                    '<div class="w-1 self-stretch shrink-0 ' + cfg.bar + '"></div>' +
+                    '<div class="p-3.5 flex items-start gap-3 flex-1">' +
+                        '<span class="text-lg ' + cfg.color + '"><i class="bi ' + cfg.icon + '"></i></span>' +
+                        '<p class="flex-1 text-xs font-medium text-gray-700 leading-relaxed">' + t.text + '</p>' +
+                        '<button type="button" class="toast-close flex-none -m-1 p-1 text-gray-400 hover:text-gray-700 transition-colors text-sm" aria-label="Tutup">&times;</button>' +
+                    '</div>';
+                container.appendChild(toast);
+
+                requestAnimationFrame(function () { toast.classList.add('toast-visible'); });
+
+                const timer = setTimeout(function () { dismiss(toast); }, t.type === 'danger' ? 7000 : 4000);
+                toast.querySelector('.toast-close').addEventListener('click', function () {
+                    clearTimeout(timer);
+                    dismiss(toast);
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>

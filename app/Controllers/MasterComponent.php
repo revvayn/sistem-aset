@@ -43,8 +43,8 @@ class MasterComponent extends BaseController
         $namaKomponen = $this->request->getPost('nama_komponen');
         $tipeInput    = $this->request->getPost('tipe_input');
         
-        // List tipe input yang diizinkan (ditambahkan 'file')
-        $allowedTypes = ['text', 'number', 'password', 'date', 'file'];
+        // List tipe input yang diizinkan
+        $allowedTypes = ['text', 'number', 'password', 'date', 'file', 'qr_code'];
         if (!in_array($tipeInput, $allowedTypes)) {
             return redirect()->back()->withInput()->with('error', 'Tipe input tidak valid!');
         }
@@ -90,7 +90,7 @@ class MasterComponent extends BaseController
         $tipeInput    = $this->request->getPost('tipe_input');
 
         // Validasi pilihan tipe input
-        $allowedTypes = ['text', 'number', 'password', 'date', 'file'];
+        $allowedTypes = ['text', 'number', 'password', 'date', 'file', 'qr_code'];
         if (!in_array($tipeInput, $allowedTypes)) {
             return redirect()->back()->withInput()->with('error', 'Tipe input tidak valid!');
         }

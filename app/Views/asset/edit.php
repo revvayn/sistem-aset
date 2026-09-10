@@ -27,27 +27,6 @@
 
         <!-- Body Card -->
         <div class="p-6 sm:p-8">
-            <?php if (session()->getFlashdata('errors')) : ?>
-                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-sm">
-                    <p class="flex items-center gap-2 text-sm font-semibold mb-1.5"><i class="bi bi-exclamation-triangle"></i> Periksa kembali isian berikut:</p>
-                    <ul class="text-xs list-disc list-inside space-y-0.5">
-                        <?php foreach (session()->getFlashdata('errors') as $err) : ?>
-                            <li><?= esc($err) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <?php if (session()->getFlashdata('error')) : ?>
-                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-sm flex items-start justify-between gap-3">
-                    <div class="flex items-center gap-2.5">
-                        <span class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0"><i class="bi bi-exclamation-triangle text-rose-600"></i></span>
-                        <span><?= session()->getFlashdata('error') ?></span>
-                    </div>
-                    <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-800 text-lg leading-none">&times;</button>
-                </div>
-            <?php endif; ?>
-
             <form action="<?= base_url('asset/update/' . $asset['id']) ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <?= csrf_field() ?>
 

@@ -121,6 +121,7 @@ class Asset extends BaseController
 
         $this->assetModel->save([
             'master_data_id' => $masterDataId,
+            'user_id'        => session()->get('id'),
             'status'         => $this->request->getPost('status'),
             'specifications' => json_encode($specifications),
         ]);

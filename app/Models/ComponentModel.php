@@ -27,4 +27,26 @@ class ComponentModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    // Mengambil komponen untuk banyak kategori sekaligus (hindari N+1), dikelompokkan per master_data_id
+    public function getComponentsByMasterDataIds(array $masterDataIds): array
+    {
+        if (empty($masterDataIds)) {
+            return [];
+        }
+
+        $rows = $this->db->table('master_data_components')
+            ->select('master_data_components.master_data_id, components.*, master_data_components.is_required')
+            ->join('components', 'components.id = master_data_components.component_id')
+            ->whereIn('master_data_components.master_data_id', $masterDataIds)
+            ->get()
+            ->getResultArray();
+
+        $grouped = [];
+        foreach ($rows as $row) {
+            $grouped[$row['master_data_id']][] = $row;
+        }
+
+        return $grouped;
+    }
 }

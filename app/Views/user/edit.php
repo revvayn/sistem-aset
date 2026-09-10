@@ -26,20 +26,6 @@
 
         <!-- Card Body -->
         <div class="p-6 sm:p-8">
-            <?php if (session()->getFlashdata('errors')) : ?>
-                <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
-                    <div class="flex items-center gap-2 font-semibold mb-2">
-                        <span class="w-6 h-6 rounded-md bg-rose-100 flex items-center justify-center shrink-0"><i class="bi bi-exclamation-triangle text-xs text-rose-600"></i></span>
-                        <span>Terjadi Kesalahan Input:</span>
-                    </div>
-                    <ul class="list-disc list-inside space-y-1 text-rose-600 pl-2">
-                        <?php foreach (session()->getFlashdata('errors') as $error) : ?>
-                            <li><?= esc($error) ?></li>
-                        <?php endforeach ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
             <form action="<?= base_url('users/update/' . $user['id']) ?>" method="POST" class="space-y-5">
                 <?= csrf_field() ?>
 

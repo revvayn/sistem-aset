@@ -29,9 +29,13 @@ class MasterCategory extends BaseController
     {
         $categories = $this->categoryModel->findAll();
 
-        // Ambil komponen untuk setiap kategori
-        foreach ($categories as &$cat) {
-            $cat['components'] = $this->componentModel->getComponentsByMasterData($cat['id']);
+        // Ambil komponen untuk semua kategori sekaligus (satu query, hindari N+1)
+        if (!empty($categories)) {
+            $groupedComponents = $this->componentModel->getComponentsByMasterDataIds(array_column($categories, 'id'));
+
+            foreach ($categories as &$cat) {
+                $cat['components'] = $groupedComponents[$cat['id']] ?? [];
+            }
         }
 
         $data = [
@@ -136,10 +140,10 @@ class MasterCategory extends BaseController
     {
         // Cek apakah ada aset yang sedang memakai kategori ini
         $assetModel = new \App\Models\AssetModel();
-        $usedInAsset = $assetModel->where('master_data_id', $id)->first();
+        $assetCount = (int) $assetModel->where('master_data_id', $id)->countAllResults();
 
-        if ($usedInAsset) {
-            return redirect()->to('/master/categories')->with('error', 'Kategori tidak bisa dihapus karena sedang digunakan oleh beberapa unit aset!');
+        if ($assetCount > 0) {
+            return redirect()->to('/master/categories')->with('error', 'Kategori tidak bisa dihapus karena sedang digunakan oleh ' . $assetCount . ' unit aset!');
         }
 
         $this->categoryModel->delete($id);

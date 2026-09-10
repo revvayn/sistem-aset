@@ -24,27 +24,6 @@
         </a>
     </div>
 
-    <!-- Alert Flash Messages -->
-    <?php if (session()->getFlashdata('message')) : ?>
-        <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 shadow-sm flex items-start justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0"><i class="bi bi-check-lg text-emerald-600"></i></span>
-                <span><?= session()->getFlashdata('message') ?></span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-800 text-lg leading-none">&times;</button>
-        </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')) : ?>
-        <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-sm flex items-start justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0"><i class="bi bi-exclamation-triangle text-rose-600"></i></span>
-                <span><?= session()->getFlashdata('error') ?></span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-800 text-lg leading-none">&times;</button>
-        </div>
-    <?php endif; ?>
-
     <!-- Card & Table Section -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
         <div class="overflow-x-auto">
