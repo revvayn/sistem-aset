@@ -1,69 +1,147 @@
-# CodeIgniter 4 Application Starter
+# Sistem Manajemen Aset (Asset Management System)
 
-## What is CodeIgniter?
+Aplikasi web untuk mengelola data aset/inventaris berbasis **CodeIgniter 4** dengan
+spesifikasi dinamis per kategori aset dan manajemen pengguna ber-role.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## Fitur
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+- **Autentikasi & RBAC** — login berbasis hash password (`password_verify`), 3 role:
+  `admin`, `staff`, `viewer`.
+- **Dashboard** — statistik total aset, kategori, komponen, status perbaikan/rusak,
+  daftar aset terbaru, dan distribusi aset per kategori.
+- **Aset dinamis** — spesifikasi aset disimpan sebagai JSON lengkap sesuai komponen
+  yang terpasang pada kategori asetnya (contoh: Merk, IMEI, Serial Number, File Garansi).
+- **Master Kategori Aset** — kategori + komponen/atribut spesifikasi yang terhubung
+  (bisa ditandai *wajib*).
+- **Master Komponen** — atribut spesifikasi dengan tipe input: `text`, `number`,
+  `password`, `date`, `file` (upload), dan `qr_code`.
+- **Upload file spesifikasi** — gambar/dokumen (jpg, jpeg, png, webp, gif, pdf, doc,
+  docx; maks. 5MB) disimpan di `public/uploads/specs`.
+- **Pencarian & filter aset** — cari keyword di isi spesifikasi (JSON) dan filter
+  berdasarkan kategori.
+- **Soft delete** — data aset yang dihapus tetap tersimpan di database (`deleted_at`).
+- **Floating toast** — notifikasi sukses/error ditampilkan sebagai toast di pojok
+  kanan atas, terpusat di layout.
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## Tech Stack
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+| Komponen   | Teknologi                                        |
+| ---------- | ------------------------------------------------ |
+| Backend    | PHP 8.2+, CodeIgniter 4.7.x                      |
+| Database   | MySQL / MariaDB (via XAMPP)                      |
+| Frontend   | Tailwind CSS v4, Bootstrap Icons, Satoshi font   |
+| Auth       | Session + CSRF global + filter `auth` / `role`   |
 
-## Installation & updates
+## Struktur Database
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+| Tabel                    | Keterangan                                      |
+| ------------------------ | ----------------------------------------------- |
+| `users`                  | Pengguna sistem (admin, staff, viewer)          |
+| `master_data`            | Kategori aset                                   |
+| `components`             | Master atribut/komponen spesifikasi             |
+| `master_data_components` | Relasi kategori ↔ komponen (+ tanda `is_required`) |
+| `assets`                 | Unit aset fisik (status, spesifikasi JSON, user_id) |
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+Skema lengkap terdapat pada migration:
+`app/Database/Migrations/2026-07-24-020503_CreateAssetManagementTables.php` dan
+`2026-09-10-120000_DropAssetCodeColumns.php` (menghapus kolom `no_aset` & `nama_aset`).
 
-## Setup
+## Menjalankan Aplikasi
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+### 1. Prasyarat
 
-## Important Change with index.php
+- PHP 8.2+ dengan ekstensi `intl`, `mbstring`, `mysqlnd`, `json`.
+- Composer.
+- Node.js + npm (untuk build Tailwind).
+- MySQL / MariaDB (disarankan XAMPP).
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+### 2. Setup
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+```bash
+# Install dependency PHP
+composer install
 
-**Please** read the user guide for a better explanation of how CI4 works!
+# Copy env lalu sesuaikan baseURL dan database
+cp env .env
 
-## Repository Management
+# Install & build Tailwind
+npm install
+npm run build
+```
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+### 3. Database
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+```bash
+# Cara A: import langsung (jika ada file database.sql fresh)
+# atau buat database kosong lalu jalankan migration:
+php spark migrate
+```
 
-## Server Requirements
+> Jika memakai `database.sql`, tabel `migrations` perlu di-sinkron-kan terlebih
+> dahulu (insert baris baseline migration `CreateAssetManagementTables`) sebelum
+> menjalankan migration drop kolom agar status tidak ganda.
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+### 4. Jalankan server
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+```bash
+php spark serve
+```
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+Akses aplikasi di `http://localhost:8080`.
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+### 5. Build Tailwind (saat developer)
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+```bash
+npm run dev    # watch mode
+npm run build  # build minified ke public/css/style.css
+```
+
+**Penting:** setiap menambah/mengubah class Tailwind di views, jalankan `npm run build`
+(atau `npm run dev`) karena `public/css/style.css` dihasilkan dari `src/input.css`.
+
+## Akun Default
+
+| Email           | Password  | Role  |
+| --------------- | --------- | ----- |
+| `admin@mail.com` | `admin123` | admin |
+
+Password disimpan terenkripsi (bcrypt) — jangan ubah lewat SQL tanpa `password_hash`.
+
+## Rute Utama
+
+| Method  | URI                     | Akses          | Fungsi                     |
+| ------- | ----------------------- | -------------- | -------------------------- |
+| GET     | `/` , `/dashboard`      | semua role     | Dashboard                  |
+| GET     | `/asset`                | semua role     | Daftar & cari aset         |
+| GET     | `/asset/create`         | admin, staff   | Form tambah aset           |
+| POST    | `/asset/store`          | admin, staff   | Simpan aset baru           |
+| GET     | `/asset/edit/(:num)`    | admin, staff   | Form edit aset             |
+| POST    | `/asset/update/(:num)`  | admin, staff   | Update aset                |
+| GET     | `/asset/get-components/(:num)` | semua role | AJAX komponen per kategori |
+| POST    | `/asset/delete/(:num)`  | admin          | Hapus aset (soft delete)   |
+| GET/POST| `/master/categories*`   | admin          | Kelola kategori aset       |
+| GET/POST| `/master/components*`   | admin          | Kelola komponen spesifikasi|
+| GET/POST| `/users*`               | admin          | Kelola pengguna            |
+
+Semua rute selain login/logout dilindungi filter `auth`; fungsi tulis dibatasi
+filter `role` (`admin`, `admin,staff`).
+
+## Keamanan
+
+- **CSRF global** aktif untuk semua request (`required` filter `csrf`); semua form
+  POST wajib membawa `csrf_field()`.
+- **Auto-routing OFF** — endpoint hanya yang terdaftar di `app/Config/Routes.php`.
+- Operasi hapus memakai **POST** (bukan GET) + CSRF.
+- Validasi tipe input `master_data_id`, `status`, dan ekstensi/ukuran file dilakukan
+  **server-side** di `AssetController::store()`/`update()`.
+- Flash data ditampilkan sebagai **floating toast** (key: `message` = sukses,
+  `error`/`msg` = gagal, `errors` = error validasi).
+
+## Pengembangan
+
+- **Controllers** → `app/Controllers` (Asset, Dashboard, Auth, MasterCategory,
+  MasterComponent, UserController).
+- **Models** → `app/Models` (AssetModel, ComponentModel, MasterDataModel,
+  MasterDataComponentModel, UserModel).
+- **Views** → `app/Views` (layout bersama di `layout/main.php`).
+- **CSS** → `src/input.css` (Tailwind v4, `@source "../app/Views/**/*.php"`).
