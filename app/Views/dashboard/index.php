@@ -108,8 +108,7 @@
                 <table class="w-full text-left text-sm text-gray-600">
                     <thead class="bg-gray-50/80 text-gray-500 uppercase text-[11px] tracking-wider border-b border-gray-200">
                         <tr>
-                            <th class="px-4 py-3">No. Aset</th>
-                            <th class="px-4 py-3">Nama Aset</th>
+                            <th class="px-4 py-3">Spesifikasi</th>
                             <th class="px-4 py-3">Kategori</th>
                             <th class="px-4 py-3">Status</th>
                         </tr>
@@ -118,10 +117,25 @@
                         <?php if (!empty($recentAssets)) : ?>
                             <?php foreach ($recentAssets as $ast) : ?>
                                 <tr class="hover:bg-blue-50/40 transition-colors">
-                                    <td class="px-4 py-3 font-mono text-xs">
-                                        <code class="px-2 py-0.5 bg-gray-100 text-gray-800 rounded-lg font-mono border border-gray-200"><?= esc($ast['no_asset'] ?? '-') ?></code>
+                                    <td class="px-4 py-3 text-xs text-gray-600">
+                                        <?php
+                                        $dSpecs = $ast['specifications'] ?? [];
+                                        if (is_string($dSpecs)) {
+                                            $dSpecs = json_decode($dSpecs, true) ?? [];
+                                        }
+                                        $texts = [];
+                                        foreach ($dSpecs as $v) {
+                                            if (is_string($v) && !preg_match('/\.(jpg|jpeg|png|webp|gif|svg|pdf|doc|docx)$/i', $v)) {
+                                                $texts[] = $v;
+                                            }
+                                            if (count($texts) >= 2) {
+                                                break;
+                                            }
+                                        }
+                                        $snippet = !empty($texts) ? implode(' • ', $texts) : '-';
+                                        ?>
+                                        <span class="line-clamp-1"><?= esc($snippet) ?></span>
                                     </td>
-                                    <td class="px-4 py-3 font-semibold text-gray-900"><?= esc($ast['nama_aset'] ?? '-') ?></td>
                                     <td class="px-4 py-3 text-xs">
                                         <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100"><?= esc($ast['nama_kategori'] ?? '-') ?></span>
                                     </td>
@@ -141,7 +155,7 @@
                             <?php endforeach; ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="4" class="px-4 py-10 text-center text-gray-400 text-xs">Belum ada data aset.</td>
+                                <td colspan="3" class="px-4 py-10 text-center text-gray-400 text-xs">Belum ada data aset.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>

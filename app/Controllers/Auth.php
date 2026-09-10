@@ -23,7 +23,7 @@ class Auth extends BaseController
 
         $user = $model->where('email', $email)->first();
 
-        if ($user) { // Bypass password_verify sementara
+        if ($user && password_verify($password, $user['password'])) {
             $sessionData = [
                 'id'         => $user['id'],
                 'nama'       => $user['nama'],
@@ -33,10 +33,10 @@ class Auth extends BaseController
             ];
             $session->set($sessionData);
             return redirect()->to('/dashboard');
-        } else {
-            $session->setFlashdata('msg', 'Email atau Password Salah');
-            return redirect()->to('/login');
         }
+
+        $session->setFlashdata('msg', 'Email atau Password Salah');
+        return redirect()->to('/login');
     }
 
     public function logout()
@@ -44,28 +44,4 @@ class Auth extends BaseController
         session()->destroy();
         return redirect()->to('/login');
     }
-    public function generate()
-{
-    $model = new \App\Models\UserModel();
-    $email = 'admin@mail.com';
-    $newPassword = 'admin123';
-    
-    // Generate hash langsung dari PHP server kamu
-    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-    $user = $model->where('email', $email)->first();
-    if ($user) {
-        $model->update($user['id'], ['password' => $hashedPassword]);
-        return "Password untuk {$email} berhasil diperbarui menjadi: <b>{$newPassword}</b>";
-    } else {
-        // Jika user belum ada, buat baru
-        $model->insert([
-            'nama'     => 'Admin System',
-            'email'    => $email,
-            'password' => $hashedPassword,
-            'role'     => 'admin'
-        ]);
-        return "User Admin baru berhasil dibuat dengan password: <b>{$newPassword}</b>";
-    }
-}
 }

@@ -127,15 +127,6 @@ class CreateAssetManagementTables extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
-            'no_asset' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 100,
-                'unique'     => true,
-            ],
-            'nama_aset' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 150,
-            ],
             'master_data_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,

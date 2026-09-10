@@ -66,7 +66,7 @@ $role = session()->get('role');
                 <span class="absolute left-3.5 text-gray-400">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" id="keywordInput" name="keyword" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all" placeholder="Cari No Asset / Nama Asset..." value="<?= esc($keyword ?? '') ?>" autocomplete="off">
+                <input type="text" id="keywordInput" name="keyword" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all" placeholder="Cari di spesifikasi aset..." value="<?= esc($keyword ?? '') ?>" autocomplete="off">
             </div>
         </div>
 
@@ -101,8 +101,6 @@ $role = session()->get('role');
             <thead class="bg-gray-50/80 border-b border-gray-200">
                 <tr>
                     <th scope="col" class="px-5 py-3.5 text-center w-12 text-[11px] font-bold uppercase tracking-wider text-gray-500">No</th>
-                    <th scope="col" class="px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-gray-500">No. Aset</th>
-                    <th scope="col" class="px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-gray-500">Nama Aset</th>
                     <th scope="col" class="px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-gray-500">Kategori</th>
                     <th scope="col" class="px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-gray-500">Status</th>
                     <th scope="col" class="px-5 py-3.5 text-center w-48 text-[11px] font-bold uppercase tracking-wider text-gray-500">Aksi</th>
@@ -114,10 +112,6 @@ $role = session()->get('role');
                     <?php foreach ($assets as $ast) : ?>
                         <tr class="hover:bg-blue-50/40 transition-colors duration-150">
                             <td class="px-5 py-4 text-center font-medium text-gray-400"><?= $i++ ?></td>
-                            <td class="px-5 py-4">
-                                <code class="px-2.5 py-1 bg-gray-100 text-gray-800 rounded-lg font-mono text-xs border border-gray-200"><?= esc($ast['no_asset'] ?? '-') ?></code>
-                            </td>
-                            <td class="px-5 py-4 font-semibold text-gray-900"><?= esc($ast['nama_aset'] ?? '-') ?></td>
                             <td class="px-5 py-4">
                                 <span class="px-2.5 py-1 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100"><?= esc($ast['nama_kategori'] ?? '-') ?></span>
                             </td>
@@ -146,8 +140,6 @@ $role = session()->get('role');
                                 <div class="flex items-center justify-center gap-1.5">
                                     <button type="button"
                                         class="btn-detail inline-flex items-center gap-1 px-3 py-1.5 border border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 text-xs font-semibold rounded-lg transition-colors"
-                                        data-no="<?= esc($ast['no_asset'] ?? '-') ?>"
-                                        data-nama="<?= esc($ast['nama_aset'] ?? '-') ?>"
                                         data-kategori="<?= esc($ast['nama_kategori'] ?? '-') ?>"
                                         data-status="<?= esc($status) ?>"
                                         data-specs='<?= htmlspecialchars(json_encode($specsData), ENT_QUOTES, 'UTF-8') ?>'>
@@ -161,9 +153,12 @@ $role = session()->get('role');
                                     <?php endif; ?>
 
                                     <?php if (strtolower($role ?? '') === 'admin') : ?>
-                                        <a href="<?= base_url('asset/delete/' . $ast['id']) ?>" class="w-8 h-8 inline-flex items-center justify-center border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg transition-colors" onclick="return confirm('Apakah Anda yakin ingin menghapus aset ini?')" title="Hapus">
-                                            <i class="bi bi-trash text-sm"></i>
-                                        </a>
+                                        <form action="<?= base_url('asset/delete/' . $ast['id']) ?>" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus aset ini?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="w-8 h-8 inline-flex items-center justify-center border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg transition-colors" title="Hapus">
+                                                <i class="bi bi-trash text-sm"></i>
+                                            </button>
+                                        </form>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -171,7 +166,7 @@ $role = session()->get('role');
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="6" class="px-5 py-14 text-center">
+                        <td colspan="4" class="px-5 py-14 text-center">
                             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-50 border border-gray-200 mb-3 text-gray-300">
                                 <i class="bi bi-inbox text-3xl"></i>
                             </div>
@@ -213,15 +208,7 @@ $role = session()->get('role');
                 <table class="w-full text-sm">
                     <tbody class="divide-y divide-gray-100">
                         <tr>
-                            <th class="w-1/3 bg-gray-50 px-4 py-3 text-left font-semibold text-gray-600 border-r border-gray-100">No. Aset</th>
-                            <td class="px-4 py-3"><code id="modalNoAsset" class="font-mono text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded text-sm border border-cyan-200"></code></td>
-                        </tr>
-                        <tr>
-                            <th class="bg-gray-50 px-4 py-3 text-left font-semibold text-gray-600 border-r border-gray-100">Nama Aset</th>
-                            <td id="modalNamaAsset" class="px-4 py-3 font-bold text-gray-900"></td>
-                        </tr>
-                        <tr>
-                            <th class="bg-gray-50 px-4 py-3 text-left font-semibold text-gray-600 border-r border-gray-100">Kategori</th>
+                            <th class="w-1/3 bg-gray-50 px-4 py-3 text-left font-semibold text-gray-600 border-r border-gray-100">Kategori</th>
                             <td id="modalKategori" class="px-4 py-3 text-gray-800"></td>
                         </tr>
                         <tr>
@@ -294,14 +281,10 @@ $role = session()->get('role');
 
         detailButtons.forEach(button => {
             button.addEventListener('click', function() {
-                const noAsset = this.getAttribute('data-no');
-                const namaAsset = this.getAttribute('data-nama');
                 const kategori = this.getAttribute('data-kategori');
                 const status = this.getAttribute('data-status');
                 const rawSpecs = this.getAttribute('data-specs');
 
-                document.getElementById('modalNoAsset').textContent = noAsset;
-                document.getElementById('modalNamaAsset').textContent = namaAsset;
                 document.getElementById('modalKategori').textContent = kategori;
                 document.getElementById('modalStatus').textContent = status;
 

@@ -27,6 +27,27 @@
 
         <!-- Body Card -->
         <div class="p-6 sm:p-8">
+            <?php if (session()->getFlashdata('errors')) : ?>
+                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-sm">
+                    <p class="flex items-center gap-2 text-sm font-semibold mb-1.5"><i class="bi bi-exclamation-triangle"></i> Periksa kembali isian berikut:</p>
+                    <ul class="text-xs list-disc list-inside space-y-0.5">
+                        <?php foreach (session()->getFlashdata('errors') as $err) : ?>
+                            <li><?= esc($err) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-sm flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0"><i class="bi bi-exclamation-triangle text-rose-600"></i></span>
+                        <span><?= session()->getFlashdata('error') ?></span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-800 text-lg leading-none">&times;</button>
+                </div>
+            <?php endif; ?>
+
             <form action="<?= base_url('asset/update/' . $asset['id']) ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <?= csrf_field() ?>
 
@@ -46,27 +67,13 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            No. Aset / Kode <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="no_asset" value="<?= esc($asset['no_asset'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all" required>
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Nama Aset <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="nama_aset" value="<?= esc($asset['nama_aset'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
                             Status <span class="text-red-500">*</span>
                         </label>
                         <select name="status" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:bg-white outline-none transition-all cursor-pointer" required>
                             <option value="Aktif" <?= (($asset['status'] ?? '') === 'Aktif') ? 'selected' : '' ?>>Aktif</option>
                             <option value="Perbaikan" <?= (($asset['status'] ?? '') === 'Perbaikan') ? 'selected' : '' ?>>Perbaikan</option>
                             <option value="Rusak" <?= (($asset['status'] ?? '') === 'Rusak') ? 'selected' : '' ?>>Rusak</option>
-                            <option value="Non-Aktif" <?= (($asset['status'] ?? '') === 'Non-Aktif') ? 'selected' : '' ?>>Non-Aktif</option>
+                            <option value="Disimpan" <?= (($asset['status'] ?? '') === 'Disimpan') ? 'selected' : '' ?>>Disimpan</option>
                         </select>
                     </div>
                 </div>

@@ -89,11 +89,16 @@
                                         </a>
 
                                         <?php if (session()->get('id') != $u['id']) : ?>
-                                            <a href="<?= base_url('users/delete/' . $u['id']) ?>"
-                                               class="w-8 h-8 inline-flex items-center justify-center border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg transition-colors text-sm"
-                                               onclick="return confirm('Yakin ingin menghapus user ini?')" title="Hapus">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
+                                            <form action="<?= base_url('users/delete/' . $u['id']) ?>"
+                                               method="POST" class="inline"
+                                               onsubmit="return confirm('Yakin ingin menghapus user ini?')">
+                                                <?= csrf_field() ?>
+                                                <button type="submit"
+                                                   class="w-8 h-8 inline-flex items-center justify-center border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg transition-colors text-sm"
+                                                   title="Hapus">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
                                         <?php else: ?>
                                             <span class="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-500 rounded-lg border border-gray-200 italic">
                                                 Akun Saya

@@ -12,8 +12,6 @@ class AssetModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $allowedFields    = [
-        'no_asset', 
-        'nama_aset', 
         'master_data_id', 
         'user_id', 
         'status', 

@@ -35,11 +35,10 @@ class Asset extends BaseController
             ->select('assets.*, master_data.nama_kategori')
             ->join('master_data', 'master_data.id = assets.master_data_id', 'left');
 
-        // Filter Keyword (No Asset atau Nama Asset)
+        // Filter Keyword (Cari dalam isi spesifikasi / JSON komponen)
         if (!empty($keyword)) {
             $builder->groupStart()
-                    ->like('assets.no_asset', $keyword)
-                    ->orLike('assets.nama_aset', $keyword)
+                    ->like('assets.specifications', $keyword)
                     ->groupEnd();
         }
 
@@ -81,7 +80,14 @@ class Asset extends BaseController
     // 4. Simpan Data Aset Baru
     public function store()
     {
-        $masterDataId = $this->request->getPost('master_data_id');
+        if (!$this->validate([
+            'master_data_id' => 'required|integer',
+            'status'         => 'required|in_list[Aktif,Perbaikan,Rusak,Disimpan]',
+        ])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $masterDataId = (int) $this->request->getPost('master_data_id');
         $components   = $this->componentModel->getComponentsByMasterData($masterDataId);
 
         $specsInput   = $this->request->getPost('specs') ?? [];
@@ -94,7 +100,13 @@ class Asset extends BaseController
 
             if ($type === 'file' || $type === 'foto') {
                 if (isset($specsFiles[$key]) && $specsFiles[$key]->isValid() && !$specsFiles[$key]->hasMoved()) {
-                    $file     = $specsFiles[$key];
+                    $file    = $specsFiles[$key];
+                    $fileErr = $this->validateSpecFile($file, $comp['nama_komponen']);
+
+                    if ($fileErr) {
+                        return redirect()->back()->withInput()->with('error', $fileErr);
+                    }
+
                     $fileName = $file->getRandomName();
 
                     $file->move(FCPATH . 'uploads/specs', $fileName);
@@ -108,8 +120,6 @@ class Asset extends BaseController
         }
 
         $this->assetModel->save([
-            'no_asset'       => $this->request->getPost('no_asset'),
-            'nama_aset'      => $this->request->getPost('nama_aset'),
             'master_data_id' => $masterDataId,
             'status'         => $this->request->getPost('status'),
             'specifications' => json_encode($specifications),
@@ -144,9 +154,16 @@ class Asset extends BaseController
             return redirect()->to('/asset')->with('error', 'Aset tidak ditemukan!');
         }
 
+        if (!$this->validate([
+            'master_data_id' => 'required|integer',
+            'status'         => 'required|in_list[Aktif,Perbaikan,Rusak,Disimpan]',
+        ])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
         $oldSpecs = json_decode($asset['specifications'] ?? '{}', true) ?? [];
 
-        $masterDataId = $this->request->getPost('master_data_id');
+        $masterDataId = (int) $this->request->getPost('master_data_id');
         $components   = $this->componentModel->getComponentsByMasterData($masterDataId);
 
         $specsInput = $this->request->getPost('specs') ?? [];
@@ -159,7 +176,13 @@ class Asset extends BaseController
 
             if ($type === 'file' || $type === 'foto') {
                 if (isset($specsFiles[$key]) && $specsFiles[$key]->isValid() && !$specsFiles[$key]->hasMoved()) {
-                    $file     = $specsFiles[$key];
+                    $file    = $specsFiles[$key];
+                    $fileErr = $this->validateSpecFile($file, $comp['nama_komponen']);
+
+                    if ($fileErr) {
+                        return redirect()->back()->withInput()->with('error', $fileErr);
+                    }
+
                     $fileName = $file->getRandomName();
                     $file->move(FCPATH . 'uploads/specs', $fileName);
 
@@ -181,8 +204,6 @@ class Asset extends BaseController
         }
 
         $this->assetModel->update($id, [
-            'no_asset'       => $this->request->getPost('no_asset'),
-            'nama_aset'      => $this->request->getPost('nama_aset'),
             'master_data_id' => $masterDataId,
             'status'         => $this->request->getPost('status'),
             'specifications' => json_encode($specifications),
@@ -209,5 +230,22 @@ class Asset extends BaseController
         }
 
         return redirect()->to('/asset')->with('error', 'Aset tidak ditemukan!');
+    }
+
+    private function validateSpecFile($file, string $label): ?string
+    {
+        $allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'doc', 'docx'];
+        $maxSize    = 5 * 1024 * 1024;
+        $ext        = strtolower($file->getClientExtension());
+
+        if (!in_array($ext, $allowedExt, true)) {
+            return "File \"" . esc($label) . "\" tidak diizinkan. Gunakan: " . implode(', ', $allowedExt) . '.';
+        }
+
+        if ($file->getSize() > $maxSize) {
+            return "Ukuran file \"" . esc($label) . "\" melebihi batas maksimal 5MB.";
+        }
+
+        return null;
     }
 }

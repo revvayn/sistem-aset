@@ -18,24 +18,31 @@
 
         <!-- Body Card -->
         <div class="p-6 sm:p-8">
+            <?php if (session()->getFlashdata('errors')) : ?>
+                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-sm">
+                    <p class="flex items-center gap-2 text-sm font-semibold mb-1.5"><i class="bi bi-exclamation-triangle"></i> Periksa kembali isian berikut:</p>
+                    <ul class="text-xs list-disc list-inside space-y-0.5">
+                        <?php foreach (session()->getFlashdata('errors') as $err) : ?>
+                            <li><?= esc($err) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')) : ?>
+                <div class="mb-5 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 shadow-sm flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center shrink-0"><i class="bi bi-exclamation-triangle text-rose-600"></i></span>
+                        <span><?= session()->getFlashdata('error') ?></span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-800 text-lg leading-none">&times;</button>
+                </div>
+            <?php endif; ?>
+
             <form action="<?= base_url('asset/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-5">
                 <?= csrf_field() ?>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label for="no_asset" class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            No. Aset / Kode Unik <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all placeholder-gray-400" id="no_asset" name="no_asset" placeholder="Contoh: AST-PC-2026-001" required>
-                    </div>
-
-                    <div>
-                        <label for="nama_aset" class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Nama Aset <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all placeholder-gray-400" id="nama_aset" name="nama_aset" placeholder="Contoh: PC Server Utama" required>
-                    </div>
-
                     <div>
                         <label for="master_data_id" class="block text-sm font-semibold text-gray-700 mb-1.5">
                             Pilih Kategori (Master Data) <span class="text-red-500">*</span>

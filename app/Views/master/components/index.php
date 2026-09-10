@@ -103,11 +103,16 @@
                                            class="w-8 h-8 inline-flex items-center justify-center border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors text-sm" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="<?= base_url('master/components/delete/' . $comp['id']) ?>"
-                                           class="w-8 h-8 inline-flex items-center justify-center border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg transition-colors text-sm"
-                                           onclick="return confirm('Yakin ingin menghapus komponen ini?')" title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
+                                        <form action="<?= base_url('master/components/delete/' . $comp['id']) ?>"
+                                           method="POST" class="inline"
+                                           onsubmit="return confirm('Yakin ingin menghapus komponen ini?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit"
+                                               class="w-8 h-8 inline-flex items-center justify-center border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg transition-colors text-sm"
+                                               title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

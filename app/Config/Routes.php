@@ -12,7 +12,6 @@ $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
 $routes->get('login', 'Auth::login');
 $routes->post('login/process', 'Auth::processLogin');
 $routes->match(['get', 'post'], 'logout', 'Auth::logout');
-$routes->get('generate-admin', 'Auth::generate');
 
 // Protected Routes (Wajib Login)
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
@@ -41,7 +40,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
     // ==========================================
     $routes->group('', ['filter' => 'role:admin'], static function ($routes) {
         // Asset Edit & Delete
-        $routes->get('asset/delete/(:num)', 'Asset::delete/$1');
+        $routes->post('asset/delete/(:num)', 'Asset::delete/$1');
 
         // Master Category Management
         $routes->get('master/categories', 'MasterCategory::index');
@@ -49,7 +48,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
         $routes->post('master/categories/store', 'MasterCategory::store');
         $routes->get('master/categories/edit/(:num)', 'MasterCategory::edit/$1');
         $routes->post('master/categories/update/(:num)', 'MasterCategory::update/$1');
-        $routes->get('master/categories/delete/(:num)', 'MasterCategory::delete/$1');
+        $routes->post('master/categories/delete/(:num)', 'MasterCategory::delete/$1');
 
         // Master Component Management
         $routes->get('master/components', 'MasterComponent::index');
@@ -57,7 +56,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
         $routes->post('master/components/store', 'MasterComponent::store');
         $routes->get('master/components/edit/(:num)', 'MasterComponent::edit/$1');
         $routes->post('master/components/update/(:num)', 'MasterComponent::update/$1');
-        $routes->get('master/components/delete/(:num)', 'MasterComponent::delete/$1');
+        $routes->post('master/components/delete/(:num)', 'MasterComponent::delete/$1');
 
         // User Management
         $routes->get('users', 'UserController::index');
@@ -65,7 +64,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
         $routes->post('users/store', 'UserController::store');
         $routes->get('users/edit/(:num)', 'UserController::edit/$1');
         $routes->post('users/update/(:num)', 'UserController::update/$1');
-        $routes->get('users/delete/(:num)', 'UserController::delete/$1');
+        $routes->post('users/delete/(:num)', 'UserController::delete/$1');
     });
 
 });

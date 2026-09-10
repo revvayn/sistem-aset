@@ -70,8 +70,6 @@ CREATE TABLE IF NOT EXISTS `master_data_components` (
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `assets` (
   `id`              INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `no_asset`        VARCHAR(100)     NOT NULL,
-  `nama_aset`       VARCHAR(150)     NOT NULL,
   `master_data_id`  INT(11) UNSIGNED NOT NULL,
   `user_id`         INT(11) UNSIGNED NULL,
   `status`          ENUM('Aktif','Perbaikan','Rusak','Disimpan') NOT NULL DEFAULT 'Aktif',
@@ -80,7 +78,6 @@ CREATE TABLE IF NOT EXISTS `assets` (
   `updated_at`      DATETIME         NULL,
   `deleted_at`      DATETIME         NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `no_asset` (`no_asset`),
   KEY `master_data_id` (`master_data_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `fk_assets_master_data` FOREIGN KEY (`master_data_id`) REFERENCES `master_data` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
