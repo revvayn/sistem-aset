@@ -1,47 +1,46 @@
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('content') ?>
-<div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+<div class="max-w-4xl mx-auto">
     <!-- Card Utama -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
+
         <!-- Header Card -->
-        <div class="bg-blue-600 px-6 py-4 flex justify-between items-center text-white">
-            <h3 class="text-lg font-bold flex items-center gap-2">
-                <i class="bi bi-plus-circle-fill"></i> Tambah Dokumentasi Aset Baru
+        <div class="px-6 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 flex justify-between items-center text-white">
+            <h3 class="text-base font-bold flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg"><i class="bi bi-plus-circle-fill"></i></span>
+                Tambah Dokumentasi Aset Baru
             </h3>
-            <a href="<?= base_url('asset') ?>" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white font-medium text-xs rounded-lg transition-colors duration-150 inline-flex items-center gap-1 shadow-sm border border-white/20">
+            <a href="<?= base_url('asset') ?>" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white font-medium text-xs rounded-lg transition-colors duration-150 inline-flex items-center gap-1.5 border border-white/20">
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
         </div>
 
         <!-- Body Card -->
-        <div class="p-6">
-            <!-- Form Wajib enctype multipart/form-data -->
+        <div class="p-6 sm:p-8">
             <form action="<?= base_url('asset/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-5">
                 <?= csrf_field() ?>
 
-                <!-- Informasi Umum -->
-                <div>
-                    <label for="no_asset" class="block text-sm font-medium text-gray-700 mb-1">
-                        No. Aset / Kode Unik <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="no_asset" name="no_asset" placeholder="Contoh: AST-PC-2026-001" required>
-                </div>
-
-                <div>
-                    <label for="nama_aset" class="block text-sm font-medium text-gray-700 mb-1">
-                        Nama Aset <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="nama_aset" name="nama_aset" placeholder="Contoh: PC Server Utama" required>
-                </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label for="master_data_id" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="no_asset" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            No. Aset / Kode Unik <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all placeholder-gray-400" id="no_asset" name="no_asset" placeholder="Contoh: AST-PC-2026-001" required>
+                    </div>
+
+                    <div>
+                        <label for="nama_aset" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Nama Aset <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all placeholder-gray-400" id="nama_aset" name="nama_aset" placeholder="Contoh: PC Server Utama" required>
+                    </div>
+
+                    <div>
+                        <label for="master_data_id" class="block text-sm font-semibold text-gray-700 mb-1.5">
                             Pilih Kategori (Master Data) <span class="text-red-500">*</span>
                         </label>
-                        <select class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="master_data_id" name="master_data_id" required>
+                        <select class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all cursor-pointer" id="master_data_id" name="master_data_id" required>
                             <option value="" selected disabled>-- Pilih Kategori Aset --</option>
                             <?php foreach ($categories ?? [] as $cat) : ?>
                                 <option value="<?= $cat['id'] ?>"><?= esc($cat['nama_kategori']) ?></option>
@@ -50,10 +49,10 @@
                     </div>
 
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="status" class="block text-sm font-semibold text-gray-700 mb-1.5">
                             Status Aset
                         </label>
-                        <select class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" id="status" name="status">
+                        <select class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all cursor-pointer" id="status" name="status">
                             <option value="Aktif" selected>Aktif</option>
                             <option value="Perbaikan">Perbaikan</option>
                             <option value="Rusak">Rusak</option>
@@ -66,10 +65,11 @@
 
                 <!-- Dynamic Components Area -->
                 <div id="dynamic-components-wrapper" class="hidden">
-                    <h4 class="text-base font-bold text-blue-600 flex items-center gap-2 mb-3">
-                        <i class="bi bi-sliders"></i> Spesifikasi Komponen Kategori
+                    <h4 class="text-base font-bold text-blue-600 flex items-center gap-2 mb-4">
+                        <span class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-sm"><i class="bi bi-sliders"></i></span>
+                        Spesifikasi Komponen Kategori
                     </h4>
-                    <div id="dynamic-components-fields" class="p-5 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+                    <div id="dynamic-components-fields" class="p-5 bg-gray-50 rounded-xl border border-gray-200/80 grid grid-cols-1 md:grid-cols-2 gap-5"></div>
                 </div>
 
                 <!-- Loading Spinner -->
@@ -80,7 +80,7 @@
 
                 <!-- Submit Button -->
                 <div class="pt-4">
-                    <button type="submit" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-sm hover:shadow transition-all duration-150 flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-emerald-600/20 active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2">
                         <i class="bi bi-check-circle-fill"></i> Simpan Aset
                     </button>
                 </div>
@@ -118,7 +118,7 @@
                             data.forEach(comp => {
                                 const requiredAttr = comp.is_required == 1 ? 'required' : '';
                                 const requiredLabel = comp.is_required == 1 ? '<span class="text-red-500">*</span>' : '';
-                                const baseInputClass = "w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all";
+                                const baseInputClass = "w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all";
 
                                 let inputHtml = '';
                                 if (comp.tipe_input === 'password') {
@@ -139,19 +139,19 @@
                                         helpText = "Format yang diizinkan: PDF, DOC, DOCX, JPG, PNG";
                                     }
 
-                                    const fileInputClass = "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg cursor-pointer bg-white outline-none focus:outline-none";
+                                    const fileInputClass = "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-xl cursor-pointer bg-white outline-none focus:outline-none";
 
                                     inputHtml = `
                                         <input type="file" class="${fileInputClass}" name="specs[${comp.key_komponen}]" accept="${acceptFormat}" ${requiredAttr}>
                                         <p class="text-xs text-gray-500 mt-1">${helpText}</p>
                                     `;
                                 } else {
-                                    inputHtml = `<input type="text" class="${baseInputClass}" name="specs[${comp.key_komponen}]" ${requiredAttr}>`;
+                                    inputHtml = `<input type="text" class="${baseInputClass}" name="specs[${comp.key_komponen}]" ${requiredAttr} placeholder="${comp.nama_komponen}">`;
                                 }
 
                                 const fieldGroup = `
                                     <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-1">${comp.nama_komponen} ${requiredLabel}</label>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">${comp.nama_komponen} ${requiredLabel}</label>
                                         ${inputHtml}
                                     </div>
                                 `;
