@@ -17,12 +17,28 @@ class MasterComponent extends BaseController
     // 1. Tampilkan Daftar Komponen
     public function index()
     {
-        /** @var array $components */
-        $components = $this->componentModel->findAll();
+        $keyword = $this->request->getGet('keyword');
+
+        $builder = $this->componentModel;
+        if (!empty($keyword)) {
+            $builder = $builder->groupStart()
+                ->like('nama_komponen', $keyword)
+                ->orLike('key_komponen', $keyword)
+                ->orLike('tipe_input', $keyword)
+                ->groupEnd();
+        }
+
+        $perPage = 10;
+        $components = $builder->paginate($perPage, 'component');
+        $this->componentModel->pager->only(['keyword']);
 
         $data = [
-            'title'      => 'Master Komponen Aset',
-            'components' => $components,
+            'title'       => 'Master Komponen Aset',
+            'components'  => $components,
+            'pager'       => $this->componentModel->pager,
+            'currentPage' => $this->request->getVar('page_component') ? (int) $this->request->getVar('page_component') : 1,
+            'perPage'     => $perPage,
+            'keyword'     => $keyword,
         ];
 
         return view('master/components/index', $data);

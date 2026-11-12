@@ -27,7 +27,19 @@ class MasterCategory extends BaseController
     // 1. Tampilkan Semua Kategori beserta Komponennya
     public function index()
     {
-        $categories = $this->categoryModel->findAll();
+        $keyword = $this->request->getGet('keyword');
+
+        $builder = $this->categoryModel;
+        if (!empty($keyword)) {
+            $builder = $builder->groupStart()
+                ->like('nama_kategori', $keyword)
+                ->orLike('keterangan', $keyword)
+                ->groupEnd();
+        }
+
+        $perPage = 10;
+        $categories = $builder->paginate($perPage, 'category');
+        $this->categoryModel->pager->only(['keyword']);
 
         // Ambil komponen untuk semua kategori sekaligus (satu query, hindari N+1)
         if (!empty($categories)) {
@@ -39,8 +51,12 @@ class MasterCategory extends BaseController
         }
 
         $data = [
-            'title'      => 'Master Kategori Aset',
-            'categories' => $categories,
+            'title'       => 'Master Kategori Aset',
+            'categories'  => $categories,
+            'pager'       => $this->categoryModel->pager,
+            'currentPage' => $this->request->getVar('page_category') ? (int) $this->request->getVar('page_category') : 1,
+            'perPage'     => $perPage,
+            'keyword'     => $keyword,
         ];
 
         return view('master/categories/index', $data);

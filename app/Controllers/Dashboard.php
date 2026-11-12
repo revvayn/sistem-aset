@@ -57,28 +57,57 @@ class Dashboard extends BaseController
                 ->countAllResults();
         }
 
-        // 6. Notifikasi: garansi akan habis dalam 30 hari
-        $warrantyAlerts = $this->db->table('assets')
+        $today = date('Y-m-d');
+        $warrantyLimit = date('Y-m-d', strtotime('+30 days'));
+
+        // 6. Notifikasi: garansi masih berlaku dan akan habis dalam 30 hari
+        $warrantyExpiring = $this->db->table('assets')
             ->select('assets.*, master_data.nama_kategori')
             ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
             ->where('assets.deleted_at', null)
-            ->where('assets.warranty_expiry IS NOT NULL', null, false)
-            ->where('assets.warranty_expiry <=', date('Y-m-d', strtotime('+30 days')))
+            ->where('assets.warranty_expiry >=', $today)
+            ->where('assets.warranty_expiry <=', $warrantyLimit)
             ->orderBy('assets.warranty_expiry', 'ASC')
             ->limit(5)
             ->get()
             ->getResultArray();
+        $totalWarrantyExpiring = (int) $this->db->table('assets')
+            ->where('deleted_at', null)
+            ->where('warranty_expiry >=', $today)
+            ->where('warranty_expiry <=', $warrantyLimit)
+            ->countAllResults();
 
-        // 7. Notifikasi: aset Perbaikan lebih dari 14 hari
+        // 7. Notifikasi: garansi sudah berakhir
+        $warrantyExpired = $this->db->table('assets')
+            ->select('assets.*, master_data.nama_kategori')
+            ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
+            ->where('assets.deleted_at', null)
+            ->where('assets.warranty_expiry <', $today)
+            ->orderBy('assets.warranty_expiry', 'DESC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
+        $totalWarrantyExpired = (int) $this->db->table('assets')
+            ->where('deleted_at', null)
+            ->where('warranty_expiry <', $today)
+            ->countAllResults();
+
+        // 8. Notifikasi: aset Perbaikan lebih dari 14 hari
         $staleMaintenance = $this->db->table('assets')
             ->select('assets.*, master_data.nama_kategori')
             ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
             ->where('assets.deleted_at', null)
             ->where('assets.status', 'Perbaikan')
             ->where('assets.updated_at <=', date('Y-m-d H:i:s', strtotime('-14 days')))
+            ->orderBy('assets.updated_at', 'ASC')
             ->limit(5)
             ->get()
             ->getResultArray();
+        $totalStaleMaintenance = (int) $this->db->table('assets')
+            ->where('deleted_at', null)
+            ->where('status', 'Perbaikan')
+            ->where('updated_at <=', date('Y-m-d H:i:s', strtotime('-14 days')))
+            ->countAllResults();
 
         // 8. Aset yang perlu perhatian (Perbaikan / Rusak)
         $attentionAssets = $this->db->table('assets')
@@ -111,8 +140,10 @@ class Dashboard extends BaseController
             'categoryStats'     => $categoryStats,
             'statusStats'       => $statusStats,
             'attentionAssets'   => $attentionAssets,
-            'warrantyAlerts'    => $warrantyAlerts,
+            'warrantyAlerts'    => $warrantyExpiring,
+            'warrantyExpired'   => $warrantyExpired,
             'staleMaintenance'  => $staleMaintenance,
+            'totalNotifications' => $totalWarrantyExpiring + $totalWarrantyExpired + $totalStaleMaintenance,
             'recentActivities'  => $recentActivities,
         ];
 

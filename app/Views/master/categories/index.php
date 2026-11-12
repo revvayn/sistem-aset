@@ -24,6 +24,20 @@
         </a>
     </div>
 
+    <!-- Search & Filter -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 mb-4">
+        <form action="<?= base_url('master/categories') ?>" method="GET" class="flex flex-wrap items-center gap-3">
+            <div class="relative flex-1 min-w-[200px]">
+                <span class="absolute left-3.5 text-gray-400"><i class="bi bi-search"></i></span>
+                <input type="text" name="keyword" value="<?= esc($keyword ?? '') ?>" class="input pl-10" placeholder="Cari kategori...">
+            </div>
+            <button type="submit" class="btn-primary"><i class="bi bi-search"></i> Cari</button>
+            <?php if (!empty($keyword)) : ?>
+                <a href="<?= base_url('master/categories') ?>" class="btn-secondary">Reset</a>
+            <?php endif; ?>
+        </form>
+    </div>
+
     <!-- Card & Table Section -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
         <div class="overflow-x-auto">
@@ -96,6 +110,32 @@
                 </tbody>
             </table>
         </div>
+
+        <?php if (!empty($categories) && isset($pager)) : ?>
+        <div class="px-6 py-4 bg-white border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="text-xs text-gray-500">
+                Menampilkan halaman <strong class="text-gray-800"><?= $currentPage ?? 1 ?></strong>
+            </div>
+            <div class="flex items-center justify-center gap-1 flex-wrap">
+                <?php
+                $pg = 'category';
+                $cp = $pager->getCurrentPage($pg);
+                $tp = $pager->getPageCount($pg);
+                ?>
+                <?php if ($cp > 1) : ?>
+                    <a href="<?= $pager->getPageURI(1, $pg) ?>" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors"><i class="bi bi-chevron-double-left"></i></a>
+                    <a href="<?= $pager->getPageURI($cp - 1, $pg) ?>" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors"><i class="bi bi-chevron-left"></i> Prev</a>
+                <?php endif; ?>
+                <?php for ($p = 1; $p <= $tp; $p++) : ?>
+                    <a href="<?= $pager->getPageURI($p, $pg) ?>" class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors <?= ($p === $cp) ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100' ?>"><?= $p ?></a>
+                <?php endfor; ?>
+                <?php if ($cp < $tp) : ?>
+                    <a href="<?= $pager->getPageURI($cp + 1, $pg) ?>" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors">Next <i class="bi bi-chevron-right"></i></a>
+                    <a href="<?= $pager->getPageURI($tp, $pg) ?>" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-colors"><i class="bi bi-chevron-double-right"></i></a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 <?= $this->endSection() ?>

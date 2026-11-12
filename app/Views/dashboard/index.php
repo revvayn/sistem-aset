@@ -13,6 +13,136 @@
 
 <?= $this->section('content') ?>
 
+<!-- Notifikasi Mengambang -->
+<?php
+$notifications = [];
+
+foreach (($warrantyExpired ?? []) as $w) {
+    $days = (int) floor((strtotime(date('Y-m-d')) - strtotime($w['warranty_expiry'])) / 86400);
+    $notifications[] = [
+        'tone'  => 'rose',
+        'icon'  => 'bi-shield-x',
+        'title' => 'Garansi sudah berakhir',
+        'desc'  => 'Berakhir ' . max(1, $days) . ' hari lalu (' . date('d M Y', strtotime($w['warranty_expiry'])) . ')',
+        'asset' => $w,
+    ];
+}
+
+foreach (($warrantyAlerts ?? []) as $w) {
+    $days = (int) ceil((strtotime($w['warranty_expiry']) - strtotime(date('Y-m-d'))) / 86400);
+    $notifications[] = [
+        'tone'  => 'amber',
+        'icon'  => 'bi-exclamation-triangle',
+        'title' => 'Garansi berakhir dalam ' . max(0, $days) . ' hari',
+        'desc'  => 'Jatuh tempo ' . date('d M Y', strtotime($w['warranty_expiry'])),
+        'asset' => $w,
+    ];
+}
+
+foreach (($staleMaintenance ?? []) as $s) {
+    $days = (int) floor((time() - strtotime($s['updated_at'])) / 86400);
+    $notifications[] = [
+        'tone'  => 'orange',
+        'icon'  => 'bi-tools',
+        'title' => 'Perbaikan berlarut-larut',
+        'desc'  => 'Dalam perbaikan ' . max(1, $days) . ' hari (sejak ' . date('d M Y', strtotime($s['updated_at'])) . ')',
+        'asset' => $s,
+    ];
+}
+$notificationTotal = (int) ($totalNotifications ?? count($notifications));
+?>
+<?php if (!empty($notifications)) : ?>
+<div x-data="{ openNotes: false }"
+     @click.outside="openNotes = false"
+     class="fixed bottom-6 right-6 z-[80] print:hidden">
+
+    <!-- Panel Notifikasi -->
+    <div x-show="openNotes"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+         class="absolute bottom-20 right-0 w-[calc(100vw-3rem)] sm:w-[380px] bg-white rounded-2xl border border-gray-200 shadow-2xl shadow-gray-900/20 overflow-hidden origin-bottom-right">
+        <div class="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-white to-amber-50/60">
+            <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center relative shrink-0">
+                <i class="bi bi-bell"></i>
+            </span>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-gray-900">Pusat Notifikasi</p>
+                <p class="text-[11px] text-gray-500">
+                    <?php if (count($notifications) < $notificationTotal) : ?>
+                        Menampilkan <?= count($notifications) ?> dari <?= $notificationTotal ?> notifikasi terbaru
+                    <?php else : ?>
+                        <?= $notificationTotal ?> notifikasi perlu ditindaklanjuti
+                    <?php endif; ?>
+                </p>
+            </div>
+            <button type="button" @click="openNotes = false" class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition-colors" aria-label="Tutup notifikasi">
+                <i class="bi bi-x-lg text-xs"></i>
+            </button>
+        </div>
+        <div class="max-h-[min(65vh,420px)] overflow-y-auto divide-y divide-gray-100">
+            <?php foreach ($notifications as $note) : ?>
+                <?php
+                $asset = $note['asset'];
+                $status = $asset['status'] ?? 'Aktif';
+                $statusClass = match ($status) {
+                    'Aktif'     => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    'Perbaikan' => 'bg-amber-50 text-amber-700 border-amber-200',
+                    'Rusak'     => 'bg-rose-50 text-rose-700 border-rose-200',
+                    default     => 'bg-gray-50 text-gray-600 border-gray-200',
+                };
+                $toneClasses = [
+                    'rose'   => ['icon' => 'bg-rose-100 text-rose-600',   'title' => 'text-rose-800',   'desc' => 'text-rose-600'],
+                    'amber'  => ['icon' => 'bg-amber-100 text-amber-600', 'title' => 'text-amber-800', 'desc' => 'text-amber-600'],
+                    'orange' => ['icon' => 'bg-orange-100 text-orange-600', 'title' => 'text-orange-800', 'desc' => 'text-orange-600'],
+                ];
+                $tone = $toneClasses[$note['tone']] ?? $toneClasses['amber'];
+                ?>
+                <a href="<?= base_url('asset/detail/' . $asset['id']) ?>" class="flex items-start gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors group">
+                    <span class="w-8 h-8 rounded-lg <?= $tone['icon'] ?> flex items-center justify-center shrink-0">
+                        <i class="bi <?= esc($note['icon']) ?> text-sm"></i>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <p class="text-xs font-bold <?= $tone['title'] ?>"><?= esc($note['title']) ?></p>
+                            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full border <?= $statusClass ?>"><?= esc($status) ?></span>
+                        </div>
+                        <p class="text-[11px] text-gray-600 mt-0.5 truncate">
+                            <span class="font-semibold text-gray-800"><?= esc($asset['serial_number'] ?: ('Aset #' . $asset['id'])) ?></span>
+                            &bull; <?= esc($asset['nama_kategori'] ?? '-') ?>
+                            <?php if (!empty($asset['location'])) : ?>
+                                &bull; <?= esc($asset['location']) ?>
+                            <?php endif; ?>
+                        </p>
+                        <p class="text-[11px] <?= $tone['desc'] ?> mt-0.5"><?= esc($note['desc']) ?></p>
+                    </div>
+                    <i class="bi bi-chevron-right text-gray-300 group-hover:text-gray-500 mt-1 text-xs transition-colors"></i>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Tombol Ikon Notifikasi -->
+    <button type="button"
+            @click="openNotes = !openNotes"
+            :aria-expanded="openNotes.toString()"
+            class="relative w-14 h-14 rounded-full bg-white border border-gray-200 text-gray-700 shadow-xl shadow-gray-900/20 flex items-center justify-center hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all duration-150"
+            aria-label="Buka notifikasi"
+            title="Notifikasi">
+        <i class="bi text-xl" :class="openNotes ? 'bi-x-lg' : 'bi-bell'"></i>
+        <?php if ($notificationTotal > 0) : ?>
+            <span class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white">
+                <?= $notificationTotal > 99 ? '99+' : $notificationTotal ?>
+            </span>
+        <?php endif; ?>
+    </button>
+</div>
+<?php endif; ?>
+
 <!-- Header Section -->
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <div>
@@ -217,36 +347,7 @@
     <!-- RIGHT COLUMN: Distribusi Kategori & Komponen System Info (4 Kolom) -->
     <div class="lg:col-span-4 space-y-6">
         
-        <!-- Notifikasi -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5">
-            <h3 class="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
-                <span class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 text-xs"><i class="bi bi-bell"></i></span>
-                Notifikasi
-            </h3>
-            <div class="space-y-3 text-xs">
-                <?php if (!empty($warrantyAlerts)) : ?>
-                    <?php foreach ($warrantyAlerts as $w) : ?>
-                        <div class="p-2 bg-amber-50 border border-amber-200 rounded-lg">
-                            <p class="font-medium text-amber-700">Garansi segera habis: <?= esc($w['nama_kategori'] ?? '-') ?></p>
-                            <p class="text-amber-600">Hingga <?= esc($w['warranty_expiry']) ?></p>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                <?php if (!empty($staleMaintenance)) : ?>
-                    <?php foreach ($staleMaintenance as $s) : ?>
-                        <div class="p-2 bg-rose-50 border border-rose-200 rounded-lg">
-                            <p class="font-medium text-rose-700">Perbaikan lama: <?= esc($s['nama_kategori'] ?? '-') ?></p>
-                            <p class="text-rose-600">Sejak <?= esc($s['updated_at']) ?></p>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                <?php if (empty($warrantyAlerts) && empty($staleMaintenance)) : ?>
-                    <p class="text-gray-400 text-center py-2">Tidak ada notifikasi.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Distribusi Status Aset -->
+                <!-- Distribusi Status Aset -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5">
             <h3 class="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
                 <span class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 text-xs"><i class="bi bi-bar-chart"></i></span>

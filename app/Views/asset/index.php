@@ -55,7 +55,7 @@ $role = session()->get('role');
                 <span class="absolute left-3.5 text-gray-400">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" id="keywordInput" name="keyword" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all" placeholder="Cari di spesifikasi aset..." value="<?= esc($keyword ?? '') ?>" autocomplete="off">
+                <input type="text" id="keywordInput" name="keyword" class="input pl-10" placeholder="Cari di spesifikasi aset..." value="<?= esc($keyword ?? '') ?>" autocomplete="off">
             </div>
         </div>
 

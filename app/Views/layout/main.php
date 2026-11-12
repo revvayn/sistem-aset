@@ -250,5 +250,48 @@
 
     <?= $this->renderSection('scripts') ?>
 
+    <script>
+    (function() {
+        function bindToggle(input) {
+            if (input.dataset.pwToggleBound === '1') return;
+            input.dataset.pwToggleBound = '1';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative';
+            if (input.parentNode) {
+                input.parentNode.insertBefore(wrapper, input);
+                wrapper.appendChild(input);
+            }
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none';
+            btn.innerHTML = '<i class="bi bi-eye"></i>';
+            btn.addEventListener('click', function() {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                } else {
+                    input.type = 'password';
+                    btn.innerHTML = '<i class="bi bi-eye"></i>';
+                }
+            });
+            wrapper.appendChild(btn);
+            input.classList.add('pr-10');
+        }
+
+        function scan() {
+            document.querySelectorAll('input[type="password"]:not([data-pw-toggle-bound])').forEach(bindToggle);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', scan);
+        } else {
+            scan();
+        }
+
+        const observer = new MutationObserver(scan);
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
+
 </body>
 </html>
