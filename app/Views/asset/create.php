@@ -49,6 +49,36 @@
 
                 <hr class="border-gray-200 my-6">
 
+                <h4 class="text-base font-bold text-gray-700 mb-3">Data Standar Aset</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nomor Seri</label>
+                        <input type="text" name="serial_number" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Lokasi</label>
+                        <input type="text" name="location" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Departemen</label>
+                        <input type="text" name="department" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal Pembelian</label>
+                        <input type="date" name="purchase_date" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Harga (Rp)</label>
+                        <input type="number" step="0.01" name="price" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Garansi Hingga</label>
+                        <input type="date" name="warranty_expiry" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                </div>
+
+                <hr class="border-gray-200 my-6">
+
                 <!-- Dynamic Components Area -->
                 <div id="dynamic-components-wrapper" class="hidden">
                     <h4 class="text-base font-bold text-blue-600 flex items-center gap-2 mb-4">
@@ -66,7 +96,7 @@
 
                 <!-- Submit Button -->
                 <div class="pt-4">
-                    <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-emerald-600/20 active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2">
+                    <button type="submit" class="btn-primary w-full justify-center">
                         <i class="bi bi-check-circle-fill"></i> Simpan Aset
                     </button>
                 </div>

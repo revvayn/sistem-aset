@@ -59,6 +59,36 @@
 
                 <hr class="border-gray-200 my-6">
 
+                <h4 class="text-base font-bold text-gray-700 mb-3">Data Standar Aset</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nomor Seri</label>
+                        <input type="text" name="serial_number" value="<?= esc($asset['serial_number'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Lokasi</label>
+                        <input type="text" name="location" value="<?= esc($asset['location'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Departemen</label>
+                        <input type="text" name="department" value="<?= esc($asset['department'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal Pembelian</label>
+                        <input type="date" name="purchase_date" value="<?= esc($asset['purchase_date'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Harga (Rp)</label>
+                        <input type="number" step="0.01" name="price" value="<?= esc($asset['price'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Garansi Hingga</label>
+                        <input type="date" name="warranty_expiry" value="<?= esc($asset['warranty_expiry'] ?? '') ?>" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                    </div>
+                </div>
+
+                <hr class="border-gray-200 my-6">
+
                 <!-- Section Atribut / Komponen Spesifikasi -->
                 <div>
                     <h4 class="text-base font-bold text-blue-600 flex items-center gap-2 mb-4">
@@ -66,9 +96,9 @@
                         Atribut / Komponen Spesifikasi
                     </h4>
 
-                    <div class="p-5 bg-gray-50 rounded-xl border border-gray-200/80">
+                    <div id="components-wrapper" class="p-5 bg-gray-50 rounded-xl border border-gray-200/80">
                         <?php if (!empty($components)) : ?>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div id="components-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <?php foreach ($components as $comp) : ?>
                                     <?php 
                                         $key       = $comp['key_komponen'];
@@ -92,10 +122,16 @@
                                                 </div>
                                             <?php endif; ?>
 
+                                            <?php
+                                            $acceptAttr = 'image/png, image/jpeg, image/jpg, .pdf, .doc, .docx';
+                                            if ($inputType === 'foto') {
+                                                $acceptAttr = 'image/png, image/jpeg, image/jpg';
+                                            }
+                                            ?>
                                             <input type="file"
                                                    name="specs[<?= esc($key) ?>]"
                                                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-xl cursor-pointer bg-white outline-none focus:outline-none"
-                                                   accept="image/png, image/jpeg, image/jpg"
+                                                   accept="<?= $acceptAttr ?>"
                                                    <?= empty($val) ? $reqAttr : '' ?>>
                                             <p class="text-xs text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengubah foto/file.</p>
 
@@ -116,7 +152,7 @@
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold text-sm rounded-xl shadow-md shadow-amber-600/20 active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2">
+                    <button type="submit" class="btn-primary w-full justify-center">
                         <i class="bi bi-check-circle-fill"></i> Update Data Aset
                     </button>
                 </div>
@@ -124,4 +160,61 @@
         </div>
     </div>
 </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.querySelector('select[name="master_data_id"]');
+    const grid = document.getElementById('components-grid');
+    if (!categorySelect || !grid) return;
+
+    function escapeHtml(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderComponents(components, values) {
+        grid.innerHTML = '';
+        if (!components || components.length === 0) {
+            grid.innerHTML = '<p class="text-sm text-gray-500 italic col-span-2">Tidak ada komponen untuk kategori ini.</p>';
+            return;
+        }
+        components.forEach(function(comp) {
+            const key = comp.key_komponen;
+            const type = comp.tipe_input || 'text';
+            const required = comp.is_required == 1;
+            const reqAttr = required ? 'required' : '';
+            const reqBadge = required ? ' <span class="text-red-500">*</span>' : '';
+            const val = (values && values[key] !== undefined && values[key] !== null) ? values[key] : '';
+            const baseInputClass = "w-full px-3.5 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all";
+            let inputHtml = '';
+            if (type === 'password') {
+                inputHtml = '<input type="password" class="' + baseInputClass + '" name="specs[' + key + ']" value="' + escapeHtml(val) + '" ' + reqAttr + '>';
+            } else if (type === 'number') {
+                inputHtml = '<input type="number" class="' + baseInputClass + '" name="specs[' + key + ']" value="' + escapeHtml(val) + '" ' + reqAttr + '>';
+            } else if (type === 'date') {
+                inputHtml = '<input type="date" class="' + baseInputClass + '" name="specs[' + key + ']" value="' + escapeHtml(val) + '" ' + reqAttr + '>';
+            } else if (type === 'file' || type === 'foto') {
+                const accept = type === 'foto' ? 'image/png, image/jpeg, image/jpg' : 'image/png, image/jpeg, image/jpg, .pdf, .doc, .docx';
+                inputHtml = '<input type="file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-xl cursor-pointer bg-white outline-none focus:outline-none" name="specs[' + key + ']" accept="' + accept + '" ' + (val ? '' : reqAttr) + '><p class="text-xs text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengubah.</p>';
+            } else if (type === 'qr_code') {
+                inputHtml = '<input type="text" class="' + baseInputClass + '" name="specs[' + key + ']" value="' + escapeHtml(val) + '" ' + reqAttr + ' placeholder="QR Code">';
+            } else {
+                inputHtml = '<input type="text" class="' + baseInputClass + '" name="specs[' + key + ']" value="' + escapeHtml(val) + '" ' + reqAttr + '>';
+            }
+            const field = '<div><label class="block text-sm font-semibold text-gray-700 mb-1.5">' + escapeHtml(comp.nama_komponen) + reqBadge + '</label>' + inputHtml + '</div>';
+            grid.insertAdjacentHTML('beforeend', field);
+        });
+    }
+
+    categorySelect.addEventListener('change', function() {
+        const id = this.value;
+        if (!id) return;
+        fetch('<?= base_url('asset/get-components') ?>/' + id)
+            .then(function(response) { return response.json(); })
+            .then(function(data) { renderComponents(data, {}); })
+            .catch(function(err) { console.error(err); });
+    });
+});
+</script>
 <?= $this->endSection() ?>

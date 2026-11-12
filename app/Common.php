@@ -1,15 +1,24 @@
 <?php
 
 /**
- * The goal of this file is to allow developers a location
- * where they can overwrite core procedural functions and
- * replace them with their own. This file is loaded during
- * the bootstrap process and is called during the framework's
- * execution.
- *
- * This can be looked at as a `master helper` file that is
- * loaded early on, and may also contain additional functions
- * that you'd like to use throughout your entire application
- *
- * @see: https://codeigniter.com/user_guide/extending/common.html
+ * Helper global untuk mencatat aktivitas (audit log).
  */
+if (!function_exists('log_activity')) {
+    function log_activity(string $action, string $entity = null, $entityId = null, string $description = null): void
+    {
+        try {
+            $db = \Config\Database::connect();
+            $db->table('activity_logs')->insert([
+                'user_id'     => session()->get('id'),
+                'action'      => $action,
+                'entity'      => $entity,
+                'entity_id'   => $entityId,
+                'description' => $description,
+                'ip_address'  => (string) service('request')->getIPAddress(),
+                'created_at'  => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            // Jangan ganggu alur utama jika logging gagal
+        }
+    }
+}

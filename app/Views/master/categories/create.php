@@ -112,8 +112,7 @@
                     </div>
                 </div>
 
-                <button type="submit"
-                        class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-emerald-600/20 transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2">
+                <button type="submit" class="btn-primary w-full justify-center">
                     <i class="bi bi-check-circle"></i> Simpan Master Kategori
                 </button>
             </form>

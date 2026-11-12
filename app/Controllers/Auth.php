@@ -24,6 +24,9 @@ class Auth extends BaseController
         $user = $model->where('email', $email)->first();
 
         if ($user && password_verify($password, $user['password'])) {
+            // Cegah session fixation: regenerasi ID session saat login berhasil
+            $session->regenerate(true);
+
             $sessionData = [
                 'id'         => $user['id'],
                 'nama'       => $user['nama'],

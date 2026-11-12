@@ -12,10 +12,16 @@ class AssetModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $allowedFields    = [
-        'master_data_id', 
-        'user_id', 
-        'status', 
-        'specifications'
+        'master_data_id',
+        'user_id',
+        'status',
+        'specifications',
+        'serial_number',
+        'location',
+        'department',
+        'purchase_date',
+        'price',
+        'warranty_expiry',
     ];
 
     protected $useTimestamps = true;

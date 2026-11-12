@@ -48,15 +48,72 @@ class Dashboard extends BaseController
         // 4. Hitung Total Jenis Komponen dari Master Atribut 'components'
         $totalComponents = $this->db->table('components')->countAllResults();
 
-        // 5. Mengirimkan data ke View
+        // 5. Statistik status aset
+        $statusStats = [];
+        foreach (['Aktif', 'Perbaikan', 'Rusak', 'Disimpan'] as $st) {
+            $statusStats[$st] = (int) $this->db->table('assets')
+                ->where('status', $st)
+                ->where('deleted_at', null)
+                ->countAllResults();
+        }
+
+        // 6. Notifikasi: garansi akan habis dalam 30 hari
+        $warrantyAlerts = $this->db->table('assets')
+            ->select('assets.*, master_data.nama_kategori')
+            ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
+            ->where('assets.deleted_at', null)
+            ->where('assets.warranty_expiry IS NOT NULL', null, false)
+            ->where('assets.warranty_expiry <=', date('Y-m-d', strtotime('+30 days')))
+            ->orderBy('assets.warranty_expiry', 'ASC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
+
+        // 7. Notifikasi: aset Perbaikan lebih dari 14 hari
+        $staleMaintenance = $this->db->table('assets')
+            ->select('assets.*, master_data.nama_kategori')
+            ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
+            ->where('assets.deleted_at', null)
+            ->where('assets.status', 'Perbaikan')
+            ->where('assets.updated_at <=', date('Y-m-d H:i:s', strtotime('-14 days')))
+            ->limit(5)
+            ->get()
+            ->getResultArray();
+
+        // 8. Aset yang perlu perhatian (Perbaikan / Rusak)
+        $attentionAssets = $this->db->table('assets')
+            ->select('assets.*, master_data.nama_kategori')
+            ->join('master_data', 'master_data.id = assets.master_data_id', 'left')
+            ->whereIn('assets.status', ['Perbaikan', 'Rusak'])
+            ->where('assets.deleted_at', null)
+            ->orderBy('assets.updated_at', 'ASC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
+
+        // 7. Aktivitas terbaru (audit log)
+        $recentActivities = $this->db->table('activity_logs')
+            ->select('activity_logs.*, users.nama as nama_user')
+            ->join('users', 'users.id = activity_logs.user_id', 'left')
+            ->orderBy('activity_logs.id', 'DESC')
+            ->limit(8)
+            ->get()
+            ->getResultArray();
+
+        // 7. Mengirimkan data ke View
         $data = [
-            'title'            => 'Dashboard Utama',
-            'totalAssets'      => (int) $totalAssets,
-            'totalCategories'  => (int) $totalCategories,
-            'totalComponents'  => (int) $totalComponents,
-            'totalMaintenance' => (int) $totalMaintenance,
-            'recentAssets'     => $recentAssets,
-            'categoryStats'    => $categoryStats,
+            'title'             => 'Dashboard Utama',
+            'totalAssets'       => (int) $totalAssets,
+            'totalCategories'   => (int) $totalCategories,
+            'totalComponents'   => (int) $totalComponents,
+            'totalMaintenance'  => (int) $totalMaintenance,
+            'recentAssets'      => $recentAssets,
+            'categoryStats'     => $categoryStats,
+            'statusStats'       => $statusStats,
+            'attentionAssets'   => $attentionAssets,
+            'warrantyAlerts'    => $warrantyAlerts,
+            'staleMaintenance'  => $staleMaintenance,
+            'recentActivities'  => $recentActivities,
         ];
 
         return view('dashboard/index', $data);

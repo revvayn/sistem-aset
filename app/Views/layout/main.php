@@ -16,7 +16,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
-<body class="h-full text-gray-800 antialiased font-sans" x-data="{ sidebarOpen: false }">
+<body class="h-full text-gray-800 antialiased font-sans bg-gradient-to-br from-slate-50 via-white to-indigo-50/30" x-data="{ sidebarOpen: false }">
 
     <?php
         $role = session()->get('role');
@@ -99,6 +99,13 @@
                             <i class="bi bi-people text-base w-5 text-center <?= $isUserActive ? 'text-white' : 'text-gray-500 group-hover:text-white' ?>"></i>
                             Management User
                         </a>
+
+                        <?php $isBackupActive = (strpos($uri, 'backup') !== false); ?>
+                        <a href="<?= base_url('backup') ?>"
+                           class="group flex items-center gap-3 px-3 py-2.5 text-[13px] font-semibold rounded-xl transition-all duration-150 <?= $isBackupActive ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/30' : 'text-gray-400 hover:bg-gray-800/70 hover:text-white' ?>">
+                            <i class="bi bi-database text-base w-5 text-center <?= $isBackupActive ? 'text-white' : 'text-gray-500 group-hover:text-white' ?>"></i>
+                            Backup & Restore
+                        </a>
                     <?php endif; ?>
                 </nav>
             </div>
@@ -133,6 +140,9 @@
                      x-transition:leave-start="transform opacity-100 scale-100"
                      x-transition:leave-end="transform opacity-0 scale-95"
                      class="absolute bottom-full left-4 right-4 mb-2 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden z-50">
+                    <a href="<?= base_url('profile') ?>" class="w-full flex items-center gap-2 px-4 py-3 text-xs font-semibold text-gray-200 hover:bg-gray-700 transition-colors">
+                        <i class="bi bi-person text-sm"></i> Profil Saya
+                    </a>
                     <form action="<?= base_url('logout') ?>" method="POST" id="logout-form">
                         <?= csrf_field() ?>
                         <button type="submit" class="w-full flex items-center gap-2 px-4 py-3 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors">
@@ -155,7 +165,7 @@
                 </button>
 
                 <div class="flex-1 min-w-0">
-                    <h2 class="text-sm lg:text-base font-bold text-gray-900 truncate"><?= esc($title ?? 'Sistem Aset') ?></h2>
+                    <h2 class="text-lg lg:text-xl font-bold text-gray-900 truncate tracking-tight"><?= esc($title ?? 'Sistem Aset') ?></h2>
                     <p class="text-[11px] text-gray-400 capitalize hidden sm:block">
                         <i class="bi bi-house-door me-1"></i><?= esc(str_replace('/', ' / ', $uri ?: 'dashboard')) ?>
                     </p>
@@ -167,7 +177,7 @@
             </header>
 
             <!-- Main Content -->
-            <main class="flex-1 overflow-y-auto p-4 lg:p-8">
+            <main class="flex-1 overflow-y-auto p-6 lg:p-10">
                 <?= $this->renderSection('content') ?>
             </main>
         </div>

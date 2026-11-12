@@ -86,8 +86,7 @@
                 </div>
 
                 <div class="pt-3">
-                    <button type="submit"
-                            class="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold text-sm rounded-xl shadow-md shadow-amber-600/20 transition-all duration-150 active:scale-[0.99] flex items-center justify-center gap-2">
+                    <button type="submit" class="btn-primary w-full justify-center">
                         <i class="bi bi-pencil-square"></i> Update Data User
                     </button>
                 </div>

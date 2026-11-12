@@ -19,7 +19,7 @@
         <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Utama</h2>
         <p class="text-sm text-gray-500">Ringkasan statistik data aset, kategori, dan komponen.</p>
     </div>
-    <a href="<?= base_url('asset/create') ?>" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-emerald-600/20 transition-all duration-150">
+    <a href="<?= base_url('asset/create') ?>" class="btn-primary">
         <i class="bi bi-plus-lg"></i> Tambah Aset
     </a>
 </div>
@@ -163,6 +163,53 @@
             </div>
         </div>
 
+        <!-- Aset Perlu Perhatian -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-200">
+                <h3 class="font-bold text-gray-900 text-sm flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600 text-xs"><i class="bi bi-exclamation-triangle"></i></span>
+                    Aset Perlu Perhatian
+                </h3>
+            </div>
+            <div class="p-5 space-y-2">
+                <?php if (!empty($attentionAssets)) : ?>
+                    <?php foreach ($attentionAssets as $a) : ?>
+                        <a href="<?= base_url('asset/' . $a['id'] . '/maintenances') ?>" class="block text-xs text-gray-700 hover:text-blue-600">
+                            <span class="font-medium"><?= esc($a['nama_kategori'] ?? '-') ?></span>
+                            <span class="text-gray-400">&bull; <?= esc($a['status']) ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <p class="text-xs text-gray-400 text-center py-2">Tidak ada aset yang perlu perhatian.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Aktivitas Terbaru -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-200">
+                <h3 class="font-bold text-gray-900 text-sm flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 text-xs"><i class="bi bi-activity"></i></span>
+                    Aktivitas Terbaru
+                </h3>
+            </div>
+            <div class="p-5 space-y-3">
+                <?php if (!empty($recentActivities)) : ?>
+                    <?php foreach ($recentActivities as $act) : ?>
+                        <div class="flex items-start gap-3 text-xs">
+                            <span class="w-2 h-2 mt-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                            <div>
+                                <p class="text-gray-700 font-medium"><?= esc($act['action']) ?> <?= esc($act['entity']) ?><?= !empty($act['entity_id']) ? ' #' . esc($act['entity_id']) : '' ?></p>
+                                <p class="text-gray-400"><?= esc($act['nama_user'] ?? 'Sistem') ?> &bull; <?= esc($act['created_at'] ?? '') ?></p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <p class="text-xs text-gray-400 text-center py-4">Belum ada aktivitas tercatat.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <!-- Section Keranjang / Draf Peminjaman Aset (Cart) -->
         <!-- Fitur cart belum diimplementasikan; blok statis dihapus agar tidak menampilkan tombol/aksi yang mati. -->
     </div>
@@ -170,6 +217,65 @@
     <!-- RIGHT COLUMN: Distribusi Kategori & Komponen System Info (4 Kolom) -->
     <div class="lg:col-span-4 space-y-6">
         
+        <!-- Notifikasi -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5">
+            <h3 class="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
+                <span class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 text-xs"><i class="bi bi-bell"></i></span>
+                Notifikasi
+            </h3>
+            <div class="space-y-3 text-xs">
+                <?php if (!empty($warrantyAlerts)) : ?>
+                    <?php foreach ($warrantyAlerts as $w) : ?>
+                        <div class="p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                            <p class="font-medium text-amber-700">Garansi segera habis: <?= esc($w['nama_kategori'] ?? '-') ?></p>
+                            <p class="text-amber-600">Hingga <?= esc($w['warranty_expiry']) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                <?php if (!empty($staleMaintenance)) : ?>
+                    <?php foreach ($staleMaintenance as $s) : ?>
+                        <div class="p-2 bg-rose-50 border border-rose-200 rounded-lg">
+                            <p class="font-medium text-rose-700">Perbaikan lama: <?= esc($s['nama_kategori'] ?? '-') ?></p>
+                            <p class="text-rose-600">Sejak <?= esc($s['updated_at']) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                <?php if (empty($warrantyAlerts) && empty($staleMaintenance)) : ?>
+                    <p class="text-gray-400 text-center py-2">Tidak ada notifikasi.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Distribusi Status Aset -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5">
+            <h3 class="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
+                <span class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 text-xs"><i class="bi bi-bar-chart"></i></span>
+                Distribusi Status
+            </h3>
+            <div class="space-y-3.5">
+                <?php
+                $statusColors = [
+                    'Aktif'     => 'from-emerald-500 to-teal-500',
+                    'Perbaikan' => 'from-amber-500 to-orange-500',
+                    'Rusak'     => 'from-rose-500 to-red-500',
+                    'Disimpan'  => 'from-gray-400 to-gray-500',
+                ];
+                foreach (($statusStats ?? []) as $st => $cnt) :
+                    $pct = ($totalAssets > 0) ? round(($cnt / $totalAssets) * 100) : 0;
+                ?>
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-gray-700 mb-1">
+                            <span><?= esc($st) ?></span>
+                            <span class="text-gray-500 font-semibold"><?= $cnt ?> (<?= $pct ?>%)</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-gradient-to-r <?= $statusColors[$st] ?? 'from-blue-500 to-indigo-500' ?> h-2 rounded-full transition-all duration-300" style="width: <?= $pct ?>%"></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <!-- Distribusi Aset per Kategori -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5">
             <h3 class="font-bold text-gray-900 text-sm mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
